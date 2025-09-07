@@ -1,9 +1,10 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggleButton } from '@/components/theme-toggle';
 import { useForm, ValidationError } from '@formspree/react';
 import Image from 'next/image';
@@ -56,14 +57,22 @@ export default function Home() {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
 
-  // Handle scroll for back-to-top button
+  // Handle scroll for back-to-top button with throttling for better performance
   useEffect(() => {
+    let ticking = false;
+    
     const handleScroll = () => {
-      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-      setShowBackToTop(scrollTop > 300); // Show after scrolling 300px
+      if (!ticking) {
+        requestAnimationFrame(() => {
+          const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+          setShowBackToTop(scrollTop > 300); // Show after scrolling 300px
+          ticking = false;
+        });
+        ticking = true;
+      }
     };
 
-    window.addEventListener('scroll', handleScroll);
+    window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
@@ -102,9 +111,9 @@ export default function Home() {
         initialAngle: 0,
       });
 
-      // Orbiting planets around the central sun
-      const orbitDistances = [160, 220, 280, 340, 400]; // Different orbital distances
-      for (let i = 0; i < 5; i++) {
+      // Orbiting planets around the central sun - reduced for better performance
+      const orbitDistances = [180, 280, 380]; // Fewer orbital distances
+      for (let i = 0; i < 3; i++) {
         const orbitRadius = orbitDistances[i];
         const size = Math.random() * 35 + 25; // Planet sizes
         const orbitSpeed = 0.8 - (i * 0.15); // Closer planets orbit faster
@@ -126,8 +135,8 @@ export default function Home() {
         });
       }
       
-      // Regular stars - reduced count
-      for (let i = 0; i < 30; i++) {
+      // Regular stars - further reduced for optimal performance
+      for (let i = 0; i < 8; i++) {
         objects.push({
           type: 'star' as const,
           size: Math.random() * 15 + 5,
@@ -139,8 +148,8 @@ export default function Home() {
         });
       }
       
-      // Twinkling stars
-      for (let i = 0; i < 20; i++) {
+      // Twinkling stars - further reduced count
+      for (let i = 0; i < 5; i++) {
         objects.push({
           type: 'twinkle' as const,
           size: Math.random() * 12 + 4,
@@ -152,8 +161,8 @@ export default function Home() {
         });
       }
       
-      // Dot stars - distant stars
-      for (let i = 0; i < 25; i++) {
+      // Dot stars - further reduced count
+      for (let i = 0; i < 6; i++) {
         objects.push({
           type: 'dot' as const,
           size: Math.random() * 3 + 1,
@@ -317,258 +326,86 @@ export default function Home() {
       }
     );
 
-    // Animate connection lines
-    gsap.fromTo('.skill-card',
-      { 
-        opacity: 0,
-        scale: 0.5
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        duration: 0.8,
-        ease: 'back.out(1.7)',
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: skillsRef.current,
-          start: 'top 75%',
-          toggleActions: 'play none none reverse',
-        }
-      }
-    );
+    // Removed GSAP animations for cards - now using framer-motion
 
-    // Projects animation
-    gsap.fromTo('.project-card',
-      { opacity: 0, y: 80, rotationX: 45 },
-      {
-        opacity: 1,
-        y: 0,
-        rotationX: 0,
-        duration: 0.8,
-        ease: 'power3.out',
-        stagger: 0.2,
-        scrollTrigger: {
-          trigger: projectsRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none reverse',
-        }
-      }
-    );
-
-    // Contact section animation
-    gsap.fromTo(contactRef.current,
-      { opacity: 0, scale: 0.8 },
-      {
-        opacity: 1,
-        scale: 1,
-        duration: 1,
-        ease: 'elastic.out(1, 0.75)',
-        scrollTrigger: {
-          trigger: contactRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none reverse',
-        }
-      }
-    );
+    // Contact section animation - now using framer-motion
 
 
-    // Add bounce class to interactive elements
-    document.querySelectorAll('.interactive-card').forEach(card => {
-      card.classList.add('bounce-element');
-    });
+    // Removed interactive card animations - now using framer-motion
 
-    // Floating animation for hero emoji
-    gsap.to('.floating-emoji', {
-      y: -10,
-      duration: 2,
-      ease: 'power1.inOut',
-      yoyo: true,
-      repeat: -1
-    });
-
-    // Add subtle bounce animation to floating elements
-    gsap.to('.bounce-element', {
-      y: -5,
-      duration: 1.5,
-      ease: 'power2.inOut',
-      yoyo: true,
-      repeat: -1
-    });
+    // Removed floating animations for better performance
 
     // Enhanced 3D space objects with orbital systems
     if (backgroundRef.current) {
       const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
       const orbitContainers = backgroundRef.current.querySelectorAll('.orbit-container');
       
-      // Animate extended background objects in about section
+      // Minimal about section animations - CSS-based twinkling
       const aboutBgObjects = document.querySelectorAll('[key^="about-"]');
       aboutBgObjects.forEach((object: Element, index) => {
         const htmlObject = object as HTMLElement;
         
-        // Subtle floating animation for about section stars
-        gsap.to(htmlObject, {
-          x: `random(-8, 8)`,
-          y: `random(-6, 6)`,
-          duration: `random(25, 40)`,
-          ease: 'none',
-          repeat: -1,
-          yoyo: true,
-          delay: index * 0.2,
-        });
-        
-        // Gentle twinkling for about section
-        gsap.to(htmlObject, {
-          opacity: `random(0.2, 0.8)`,
-          duration: `random(2, 4)`,
-          ease: 'power2.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: index * 0.1,
-        });
+        // Use CSS animation instead of GSAP for better performance
+        htmlObject.style.animation = `starTwinkle ${2 + Math.random() * 2}s ease-in-out infinite`;
+        htmlObject.style.animationDelay = `${index * 0.2}s`;
       });
       
-      // Animate central sun
+      // Simplified central sun animation
       const centralSun = backgroundRef.current.querySelector('.central-sun');
       if (centralSun) {
-        // Slow self rotation for the sun
+        // Simple rotation only - removed floating and pulsing for better performance
         gsap.to(centralSun, {
           rotationY: 360,
-          duration: 25,
+          duration: 30,
           ease: 'none',
           repeat: -1,
-        });
-        
-        // Very subtle floating movement for the sun
-        gsap.to(centralSun, {
-          x: `random(-5, 5)`,
-          y: `random(-3, 3)`,
-          duration: `random(60, 80)`,
-          ease: 'power1.inOut',
-          repeat: -1,
-          yoyo: true,
-        });
-        
-        // Pulsing glow effect for the sun
-        gsap.to(centralSun, {
-          scale: `random(0.98, 1.02)`,
-          duration: `random(8, 12)`,
-          ease: 'power2.inOut',
-          repeat: -1,
-          yoyo: true,
         });
       }
 
-      // Animate other central planets (if any)
+      // Simplified central planets animation
       const centralPlanets = backgroundRef.current.querySelectorAll('.central-planet:not(.central-sun)');
       centralPlanets.forEach((planet, index) => {
-        // Self rotation
+        // Simple self rotation only
         gsap.to(planet, {
           rotationY: 360,
-          duration: `random(12, 18)`,
+          duration: 15,
           ease: 'none',
           repeat: -1,
         });
-        
-        // Subtle floating movement for central planets
-        gsap.to(planet, {
-          x: `random(-10, 10)`,
-          y: `random(-8, 8)`,
-          duration: `random(40, 60)`,
-          ease: 'power1.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: index * 1,
-        });
-        
-        // Pulsing glow effect
-        gsap.to(planet, {
-          scale: `random(0.95, 1.05)`,
-          duration: `random(6, 10)`,
-          ease: 'power2.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: index * 0.5,
-        });
       });
       
-      // Animate orbiting planets
+      // Simplified orbiting planets animation
       const orbitingPlanets = backgroundRef.current.querySelectorAll('.orbiting-planet');
       orbitingPlanets.forEach((planet, index) => {
-        // Self rotation (different from orbital rotation)
+        // Simple self rotation only
         gsap.to(planet, {
           rotationY: 360,
-          duration: `random(8, 15)`,
+          duration: 12,
           ease: 'none',
           repeat: -1,
         });
-        
-        // Slight wobble for realism
-        gsap.to(planet, {
-          rotationX: `random(-5, 5)`,
-          duration: `random(3, 6)`,
-          ease: 'power2.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: index * 0.2,
-        });
       });
       
-      // Animate orbit containers for slight variations
-      orbitContainers.forEach((container, index) => {
-        // Very subtle orbital plane tilting
-        gsap.to(container, {
-          rotationX: `random(-2, 2)`,
-          rotationZ: `random(-1, 1)`,
-          duration: `random(50, 80)`,
-          ease: 'power1.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: index * 2,
-        });
-      });
+      // Removed orbit container animations for better performance
       
-      // Star animations (unchanged but enhanced)
+      // Optimized star animations - CSS-based for better performance
       const stars = backgroundRef.current.querySelectorAll('.bg-shape:not(.planet-3d)');
       stars.forEach((star, index) => {
-        gsap.to(star, {
-          x: `random(-15, 15)`,
-          y: `random(-12, 12)`,
-          duration: `random(30, 50)`,
-          ease: 'none',
-          repeat: -1,
-          yoyo: true,
-          delay: index * 0.1,
-        });
-        
-        // Enhanced twinkling for stars
-        gsap.to(star, {
-          opacity: `random(0.3, 1)`,
-          duration: `random(1, 3)`,
-          ease: 'power2.inOut',
-          repeat: -1,
-          yoyo: true,
-          delay: index * 0.05,
-        });
-
-        // Scale pulsing with 3D effect
-        if (index % 5 === 0) {
-          gsap.to(star, {
-            scale: `random(0.8, 1.2)`,
-            rotationZ: `random(-90, 90)`,
-            duration: `random(5, 12)`,
-            ease: 'power1.inOut',
-            repeat: -1,
-            yoyo: true,
-            delay: index * 0.2,
-          });
-        }
+        const htmlStar = star as HTMLElement;
+        // Use CSS animation for much better performance
+        htmlStar.style.animation = `starTwinkle ${1.5 + Math.random() * 1.5}s ease-in-out infinite`;
+        htmlStar.style.animationDelay = `${index * 0.1}s`;
       });
     }
 
-    // Mouse interaction with 3D space objects
+    // Optimized mouse interaction - throttled and minimal calculations
+    let mouseThrottled = false;
     const handleMouseMove = (e: MouseEvent) => {
-      if (heroSectionRef.current && backgroundRef.current) {
-        const heroRect = heroSectionRef.current.getBoundingClientRect();
+      if (mouseThrottled || !heroSectionRef.current || !backgroundRef.current) return;
+      
+      mouseThrottled = true;
+      requestAnimationFrame(() => {
+        const heroRect = heroSectionRef.current!.getBoundingClientRect();
         const mouseX = e.clientX - heroRect.left;
         const mouseY = e.clientY - heroRect.top;
         const centerX = heroRect.width / 2;
@@ -578,78 +415,43 @@ export default function Home() {
         const normalizedX = (mouseX - centerX) / centerX;
         const normalizedY = (mouseY - centerY) / centerY;
         
-        const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
-        spaceObjects.forEach((object: Element, index) => {
-          const htmlObject = object as HTMLElement;
-          const isPlanet = htmlObject.classList.contains('planet-3d');
-          const distance = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
-          const influence = Math.max(0, 1 - distance * 0.5);
+        // Only affect central planets for better performance
+        const centralPlanets = backgroundRef.current!.querySelectorAll('.central-planet, .central-sun');
+        centralPlanets.forEach((planet: Element) => {
+          const htmlObject = planet as HTMLElement;
           
-          if (isPlanet) {
-            // Planets have stronger, more 3D movement
-            const moveX = normalizedX * (30 + index % 15) * influence;
-            const moveY = normalizedY * (25 + index % 12) * influence;
-            const moveZ = normalizedX * normalizedY * 50 * influence;
-            
-            gsap.to(htmlObject, {
-              x: moveX,
-              y: moveY,
-              z: moveZ,
-              rotationY: normalizedX * 45 * influence,
-              rotationX: normalizedY * 30 * influence,
-              duration: 0.8,
-              ease: 'power2.out',
-              overwrite: 'auto'
-            });
-          } else {
-            // Stars have lighter movement
-            const moveX = normalizedX * (15 + index % 8) * influence;
-            const moveY = normalizedY * (12 + index % 6) * influence;
-            
-            gsap.to(htmlObject, {
-              x: moveX,
-              y: moveY,
-              rotationZ: normalizedX * 20 * influence,
-              duration: 0.4,
-              ease: 'power2.out',
-              overwrite: 'auto'
-            });
-          }
+          // Very subtle movement - reduced intensity
+          const moveX = normalizedX * 8;
+          const moveY = normalizedY * 6;
+          
+          gsap.to(htmlObject, {
+            x: moveX,
+            y: moveY,
+            duration: 1.5,
+            ease: 'power1.out',
+            overwrite: 'auto'
+          });
         });
-      }
+        
+        mouseThrottled = false;
+      });
     };
 
     // Add mouse move listener to hero section
     if (heroSectionRef.current) {
       heroSectionRef.current.addEventListener('mousemove', handleMouseMove);
       
-      // Reset space objects position when mouse leaves
+      // Optimized reset when mouse leaves
       heroSectionRef.current.addEventListener('mouseleave', () => {
         if (backgroundRef.current) {
-          const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
-          spaceObjects.forEach((object: Element) => {
-            const htmlObject = object as HTMLElement;
-            const isPlanet = htmlObject.classList.contains('planet-3d');
-            
-            if (isPlanet) {
-              gsap.to(object, {
-                x: 0,
-                y: 0,
-                z: 0,
-                rotationX: 0,
-                rotationY: 0,
-                duration: 1.5,
-                ease: 'power2.out'
-              });
-            } else {
-              gsap.to(object, {
-                x: 0,
-                y: 0,
-                rotationZ: 0,
-                duration: 1,
-                ease: 'power2.out'
-              });
-            }
+          const centralPlanets = backgroundRef.current.querySelectorAll('.central-planet, .central-sun');
+          centralPlanets.forEach((planet: Element) => {
+            gsap.to(planet, {
+              x: 0,
+              y: 0,
+              duration: 1.8,
+              ease: 'power1.out'
+            });
           });
         }
       });
@@ -686,31 +488,29 @@ export default function Home() {
     }
   }, [isDarkMode]);
 
-  // Smooth scroll function
-  const scrollToSection = (sectionId: string) => {
+  // Memoized scroll functions for better performance
+  const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
       gsap.to(window, {
-        duration: 1.5,
+        duration: 1.2,
         scrollTo: {
           y: element,
           offsetY: 80 // Account for fixed navbar height
         },
-        ease: "power2.inOut"
+        ease: "power1.inOut"
       });
     }
-  };
+  }, []);
 
-  // Back to top function
-  const scrollToTop = () => {
-    gsap.to(window, {
-      duration: 1.5,
-      scrollTo: { y: 0 },
-      ease: "power2.inOut"
+  const scrollToTop = useCallback(() => {
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
     });
-  };
+  }, []);
 
-  const skills = [
+  const skills = useMemo(() => [
     { name: 'MongoDB', icon: 'M', category: 'Database', color: 'from-green-500 to-green-600' },
     { name: 'Express.js', icon: 'E', category: 'Backend', color: 'from-gray-600 to-gray-700' },
     { name: 'React', icon: 'R', category: 'Frontend', color: 'from-blue-500 to-blue-600' },
@@ -727,9 +527,9 @@ export default function Home() {
     { name: 'AWS', icon: 'AWS', category: 'Cloud', color: 'from-orange-400 to-orange-500' },
     { name: 'React Query', icon: 'RQ', category: 'Data Fetching', color: 'from-red-500 to-pink-600' },
     { name: 'Redux', icon: 'RX', category: 'State Mgmt', color: 'from-purple-600 to-purple-700' }
-  ];
+  ], []);
 
-  const projects = [
+  const projects = useMemo(() => [
     {
       title: 'Online Coaching Platform',
       description: 'Developed a front-end web application using React.js and Tailwind CSS with static data. Created a public landing page showcasing offers, contact details, and social media links.',
@@ -771,7 +571,7 @@ export default function Home() {
       demo: 'https://fajr-alkhayr.vercel.app/',
       image: '/projects/Screenshot 2025-09-07 111024.png'
     }
-  ];
+  ], []);
   const [state, handleSubmit] = useForm("xandaqbk");
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark bg-black text-white' : 'bg-white text-black'}`}>
@@ -781,18 +581,18 @@ export default function Home() {
           <div className="flex justify-center items-center h-16 relative">
             {/* Desktop Menu - Centered */}
             <div className="hidden md:flex items-center justify-center space-x-6 lg:space-x-8">
-              <button onClick={() => scrollToSection('home')} className={`transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Home</button>
-              <button onClick={() => scrollToSection('about')} className={`transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>About</button>
-              <button onClick={() => scrollToSection('skills')} className={`transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Skills</button>
-              <button onClick={() => scrollToSection('projects')} className={`transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Projects</button>
-              <button onClick={() => scrollToSection('contact')} className={`transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Contact</button>
+              <button onClick={() => scrollToSection('home')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Home</button>
+              <button onClick={() => scrollToSection('about')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>About</button>
+              <button onClick={() => scrollToSection('skills')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Skills</button>
+              <button onClick={() => scrollToSection('projects')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Projects</button>
+              <button onClick={() => scrollToSection('contact')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Contact</button>
             </div>
             
             {/* Dark Mode Toggle - Positioned absolutely to the right */}
-            <div className="absolute right-0">
+            <div className="absolute  right-0">
               <ThemeToggleButton 
                 isDarkMode={isDarkMode} 
-                onToggle={() => setIsDarkMode(!isDarkMode)}
+                onToggle={useCallback(() => setIsDarkMode(prev => !prev), [])}
               />
             </div>
             
@@ -813,11 +613,11 @@ export default function Home() {
           {isMobileMenuOpen && (
             <div className={`md:hidden absolute top-16 left-0 right-0 backdrop-blur-sm shadow-lg transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
               <div className="px-4 py-3 space-y-3 text-center">
-                <button onClick={() => {scrollToSection('home'); setIsMobileMenuOpen(false);}} className={`block w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Home</button>
+                <button onClick={() => {scrollToSection('home'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Home</button>
                 <button onClick={() => {scrollToSection('about'); setIsMobileMenuOpen(false);}} className={`block w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>About</button>
-                <button onClick={() => {scrollToSection('skills'); setIsMobileMenuOpen(false);}} className={`block w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Skills</button>
-                <button onClick={() => {scrollToSection('projects'); setIsMobileMenuOpen(false);}} className={`block w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Projects</button>
-                <button onClick={() => {scrollToSection('contact'); setIsMobileMenuOpen(false);}} className={`block w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Contact</button>
+                <button onClick={() => {scrollToSection('skills'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Skills</button>
+                <button onClick={() => {scrollToSection('projects'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Projects</button>
+                <button onClick={() => {scrollToSection('contact'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Contact</button>
               </div>
             </div>
           )}
@@ -1087,22 +887,67 @@ export default function Home() {
             <div className="space-y-6 sm:space-y-8">
               
               {/* Name */}
-              <div className={`p-4 sm:p-6 rounded-xl transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}>
+              <motion.div 
+                className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}
+                initial={{ opacity: 0, x: -50, scale: 0.9 }}
+                whileInView={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  transition: { duration: 0.6, delay: 0.1 }
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  rotateY: 5,
+                  transition: { duration: 0.2 }
+                }}
+                viewport={{ once: true }}
+              >
                 <div className="text-sm sm:text-base font-medium opacity-80 mb-2">Name</div>
                 <div className="text-lg sm:text-xl font-bold">Mohamed Tealeb</div>
-              </div>
+              </motion.div>
 
               {/* Role */}
-              <div className={`p-4 sm:p-6 rounded-xl transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}>
+              <motion.div 
+                className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}
+                initial={{ opacity: 0, x: -50, scale: 0.9 }}
+                whileInView={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  transition: { duration: 0.6, delay: 0.2 }
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  rotateY: 5,
+                  transition: { duration: 0.2 }
+                }}
+                viewport={{ once: true }}
+              >
                 <div className="text-sm sm:text-base font-medium opacity-80 mb-2">Role</div>
                 <div className="text-lg sm:text-xl font-bold">MERN Stack Developer</div>
-              </div>
+              </motion.div>
 
               {/* Location */}
-              <div className={`p-4 sm:p-6 rounded-xl transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}>
+              <motion.div 
+                className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}
+                initial={{ opacity: 0, x: -50, scale: 0.9 }}
+                whileInView={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  transition: { duration: 0.6, delay: 0.3 }
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  rotateY: 5,
+                  transition: { duration: 0.2 }
+                }}
+                viewport={{ once: true }}
+              >
                 <div className="text-sm sm:text-base font-medium opacity-80 mb-2">Location</div>
                 <div className="text-lg sm:text-xl font-bold">Egypt </div>
-              </div>
+              </motion.div>
 
             </div>
 
@@ -1110,34 +955,79 @@ export default function Home() {
             <div className="space-y-6 sm:space-y-8">
 
               {/* Email */}
-              <div className={`p-4 sm:p-6 rounded-xl transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}>
+              <motion.div 
+                className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}
+                initial={{ opacity: 0, x: 50, scale: 0.9 }}
+                whileInView={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  transition: { duration: 0.6, delay: 0.1 }
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  rotateY: -5,
+                  transition: { duration: 0.2 }
+                }}
+                viewport={{ once: true }}
+              >
                 <div className="text-sm sm:text-base font-medium opacity-80 mb-2">Email</div>
                 <div className="text-lg sm:text-xl font-bold">
                   <a href="mailto: mohamedtealeb088@gmail.com" className="hover:underline">
                  mohamedtealeb088@gmail.com
                   </a>
                 </div>
-              </div>
+              </motion.div>
 
               {/* LinkedIn */}
-              <div className={`p-4 sm:p-6 rounded-xl transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}>
+              <motion.div 
+                className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}
+                initial={{ opacity: 0, x: 50, scale: 0.9 }}
+                whileInView={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  transition: { duration: 0.6, delay: 0.2 }
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  rotateY: -5,
+                  transition: { duration: 0.2 }
+                }}
+                viewport={{ once: true }}
+              >
                 <div className="text-sm sm:text-base font-medium opacity-80 mb-2">LinkedIn</div>
                 <div className="text-lg sm:text-xl font-bold">
                   <a href="https://linkedin.com/in/mohamed-ayman-25ba6326a/" target="_blank" rel="noopener noreferrer" className="hover:underline">
                     linkedin.com/in//mohamed-tealeb
                   </a>
                 </div>
-              </div>
+              </motion.div>
 
               {/* GitHub */}
-              <div className={`p-4 sm:p-6 rounded-xl transition-all duration-300 hover:scale-105 ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}>
+              <motion.div 
+                className={`p-4 sm:p-6 rounded-xl ${isDarkMode ? 'bg-black bg-opacity-20 backdrop-blur-md text-white' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30'}`}
+                initial={{ opacity: 0, x: 50, scale: 0.9 }}
+                whileInView={{ 
+                  opacity: 1, 
+                  x: 0, 
+                  scale: 1,
+                  transition: { duration: 0.6, delay: 0.3 }
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  rotateY: -5,
+                  transition: { duration: 0.2 }
+                }}
+                viewport={{ once: true }}
+              >
                 <div className="text-sm sm:text-base font-medium opacity-80 mb-2">GitHub</div>
                 <div className="text-lg sm:text-xl font-bold">
                   <a href="https://github.com/MohamedTealeb" target="_blank" rel="noopener noreferrer" className="hover:underline">
                     github.com/MohamedTealeb
                   </a>
                 </div>
-              </div>
+              </motion.div>
 
             </div>
           </div>
@@ -1152,22 +1042,22 @@ export default function Home() {
           </h2>
           
           {/* Planetary Skills System */}
-          <div className="relative w-full h-[400px] xs:h-[450px] sm:h-[600px] md:h-[700px] lg:h-[800px] mx-auto overflow-hidden">
+          <div className="relative w-full h-[350px] xs:h-[400px] sm:h-[600px] md:h-[700px] lg:h-[800px] mx-auto overflow-hidden">
 
             {/* Central Sun - Mobile */}
             <div
-              className={`sm:hidden central-skills-sun absolute transition-all duration-500 hover:scale-110 cursor-pointer rounded-full flex items-center justify-center border-2 ${isDarkMode ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 border-yellow-300 shadow-[0_0_20px_rgba(255,215,0,0.7),0_0_40px_rgba(255,165,0,0.5)]' : 'bg-gradient-to-br from-yellow-300 via-orange-400 to-red-500 border-yellow-400 shadow-[0_0_15px_rgba(255,165,0,0.6),0_0_30px_rgba(255,140,0,0.4)]'}`}
+              className={`sm:hidden central-skills-sun absolute transition-all duration-500 hover:scale-110 cursor-pointer rounded-full flex items-center justify-center border-2 ${isDarkMode ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 border-yellow-300 shadow-[0_0_15px_rgba(255,215,0,0.6),0_0_25px_rgba(255,165,0,0.4)]' : 'bg-gradient-to-br from-yellow-300 via-orange-400 to-red-500 border-yellow-400 shadow-[0_0_12px_rgba(255,165,0,0.5),0_0_20px_rgba(255,140,0,0.3)]'}`}
               style={{
-                left: 'calc(50% - 5px)',
+                left: 'calc(50% - 2px)',
                 top: '50%',
-                width: '70px', // Smaller for mobile
-                height: '70px', // Smaller for mobile
+                width: '60px', // More compact for mobile
+                height: '60px', // More compact for mobile
                 transform: 'translate(-50%, -50%)',
                 zIndex: 20,
               }}
             >
               <div className={`text-center transition-colors duration-300`}>
-                <div className={`text-xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-white'}`}>☀️</div>
+                <div className={`text-lg font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-white'}`}>☀️</div>
               </div>
             </div>
 
@@ -1198,8 +1088,8 @@ export default function Home() {
               const angle = index * angleStep;
               
               // Calculate positions for both mobile and desktop
-              const mobileOrbitRadius = 160; // Reduced for better mobile fit
-              const mobileSunRadius = 48; // Updated for larger mobile sun (w-32)
+              const mobileOrbitRadius = 130; // Further reduced for better mobile responsiveness
+              const mobileSunRadius = 35; // Adjusted for mobile sun
               const mobileLineLength = mobileOrbitRadius - mobileSunRadius;
               
               // Desktop positions (adjusted for sun position)
@@ -1216,15 +1106,15 @@ export default function Home() {
                   <div
                     className={`sm:hidden absolute transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600' : 'bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500'}`}
                     style={{
-                      left: `calc(50% - 5px)`,
+                      left: `calc(50% - 2px)`,
                       top: `calc(50%)`,
                       width: `${mobileLineLength}px`,
                       height: '1.5px',
                       transformOrigin: 'left center',
                       transform: `rotate(${angle}deg)`,
-                      opacity: 0.5,
+                      opacity: 0.4,
                       zIndex: 5,
-                      boxShadow: `0 0 6px ${isDarkMode ? 'rgba(255,215,0,0.4)' : 'rgba(255,165,0,0.3)'}`,
+                      boxShadow: `0 0 4px ${isDarkMode ? 'rgba(255,215,0,0.3)' : 'rgba(255,165,0,0.2)'}`,
                     }}
                   />
                   
@@ -1288,10 +1178,35 @@ export default function Home() {
             Featured Projects
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {projects.map((project) => (
-              <div
+            {projects.map((project, index) => (
+              <motion.div
                 key={project.title}
-                className={`project-card group rounded-2xl p-4 sm:p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg flex flex-col ${isDarkMode ? 'bg-black bg-opacity-80 backdrop-blur-sm hover:bg-opacity-90' : 'bg-white border-2 border-gray-200 hover:border-gray-300'}`}
+                className={`project-card group rounded-2xl p-4 sm:p-6 shadow-lg flex flex-col ${isDarkMode ? 'bg-black bg-opacity-80 backdrop-blur-sm hover:bg-opacity-90' : 'bg-white border-2 border-gray-200 hover:border-gray-300'}`}
+                initial={{ 
+                  opacity: 0, 
+                  y: 100, 
+                  rotateX: 45,
+                  scale: 0.8 
+                }}
+                whileInView={{ 
+                  opacity: 1, 
+                  y: 0, 
+                  rotateX: 0,
+                  scale: 1,
+                  transition: {
+                    duration: 0.8,
+                    delay: index * 0.2,
+                    ease: [0.25, 0.46, 0.45, 0.94]
+                  }
+                }}
+                whileHover={{ 
+                  scale: 1.05,
+                  y: -10,
+                  rotateY: 5,
+                  transition: { duration: 0.3, ease: "easeOut" }
+                }}
+                whileTap={{ scale: 0.95 }}
+                viewport={{ once: true, margin: "-50px" }}
               >
                 {/* Project Image */}
                 <div className="w-full h-48 rounded-lg mb-4 overflow-hidden">
@@ -1353,27 +1268,61 @@ export default function Home() {
                     Live Demo
                   </a>
                 </div>
-              </div>
+              </motion.div>
             ))}
           </div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className={`py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`} ref={contactRef}>
+      <motion.section 
+        id="contact" 
+        className={`py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`} 
+        ref={contactRef}
+        initial={{ opacity: 0, scale: 0.8 }}
+        whileInView={{ 
+          opacity: 1, 
+          scale: 1,
+          transition: {
+            duration: 1,
+            ease: [0.25, 0.46, 0.45, 0.94]
+          }
+        }}
+        viewport={{ once: true, margin: "-100px" }}
+      >
         <div className="max-w-4xl mx-auto text-center">
-          <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent'}`}>
+          <motion.h2 
+            className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent'}`}
+            initial={{ opacity: 0, y: -30 }}
+            whileInView={{ 
+              opacity: 1, 
+              y: 0,
+              transition: { duration: 0.8, ease: "easeOut" }
+            }}
+            viewport={{ once: true, margin: "-50px" }}
+          >
             Let&apos;s Work Together
-          </h2>
+          </motion.h2>
           {/* Contact Form */}
           <div className="max-w-2xl mx-auto mb-8 sm:mb-12">
-       <form 
+       <motion.form 
          onSubmit={handleSubmit}
          className={`p-6 sm:p-8 rounded-2xl transition-all duration-300 ${
            isDarkMode 
              ? 'bg-black' 
              : 'bg-white border border-gray-200 shadow-lg'
          }`}
+         initial={{ opacity: 0, y: 30 }}
+         whileInView={{ 
+           opacity: 1, 
+           y: 0,
+           transition: {
+             duration: 0.8,
+             delay: 0.2,
+             ease: "easeOut"
+           }
+         }}
+         viewport={{ once: true, margin: "-50px" }}
        >
         {/* Success Message */}
         {state.succeeded && (
@@ -1384,7 +1333,15 @@ export default function Home() {
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
           {/* Name Input */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            whileInView={{ 
+              opacity: 1, 
+              x: 0,
+              transition: { duration: 0.6, delay: 0.3 }
+            }}
+            viewport={{ once: true }}
+          >
             <input
               type="text"
               name="name"
@@ -1396,10 +1353,18 @@ export default function Home() {
                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500'
                }`}
             />
-          </div>
+          </motion.div>
 
           {/* Email Input */}
-          <div>
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            whileInView={{ 
+              opacity: 1, 
+              x: 0,
+              transition: { duration: 0.6, delay: 0.4 }
+            }}
+            viewport={{ once: true }}
+          >
             <input
               type="email"
               name="email"
@@ -1412,11 +1377,20 @@ export default function Home() {
                }`}
             />
             <ValidationError prefix="Email" field="email" errors={state.errors} />
-          </div>
+          </motion.div>
         </div>
 
         {/* Subject Input */}
-        <div className="mb-4 sm:mb-6">
+        <motion.div 
+          className="mb-4 sm:mb-6"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ 
+            opacity: 1, 
+            y: 0,
+            transition: { duration: 0.6, delay: 0.5 }
+          }}
+          viewport={{ once: true }}
+        >
           <input
             type="text"
             name="subject"
@@ -1427,10 +1401,19 @@ export default function Home() {
                    : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500'
                }`}
           />
-        </div>
+        </motion.div>
 
         {/* Message Textarea */}
-        <div className="mb-6 sm:mb-8">
+        <motion.div 
+          className="mb-6 sm:mb-8"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ 
+            opacity: 1, 
+            y: 0,
+            transition: { duration: 0.6, delay: 0.6 }
+          }}
+          viewport={{ once: true }}
+        >
           <textarea
             rows={5}
             name="message"
@@ -1443,28 +1426,41 @@ export default function Home() {
              }`}
           ></textarea>
           <ValidationError prefix="Message" field="message" errors={state.errors} />
-        </div>
+        </motion.div>
 
         {/* Submit Button */}
         <div className="text-center">
-           <button
+           <motion.button
              type="submit"
              disabled={state.submitting}
-             className={`px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+             className={`px-8 py-3 rounded-full font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
                isDarkMode 
                  ? 'bg-black text-white hover:bg-black-800 shadow-black/25' 
                  : 'bg-black text-white hover:bg-gray-800'
              }`}
+             whileHover={{ 
+               scale: 1.05,
+               y: -2,
+               transition: { duration: 0.2 }
+             }}
+             whileTap={{ scale: 0.95 }}
+             initial={{ opacity: 0, y: 20 }}
+             whileInView={{ 
+               opacity: 1, 
+               y: 0,
+               transition: { duration: 0.5 }
+             }}
+             viewport={{ once: true }}
            >
             {state.submitting ? "Sending..." : "Send Message →"}
-          </button>
+          </motion.button>
         </div>
-      </form>
+      </motion.form>
     </div>
 
          
         </div>
-      </section>
+      </motion.section>
 
       {/* Footer */}
       <footer className={`py-6 sm:py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
@@ -1513,23 +1509,56 @@ export default function Home() {
       </footer>
 
       {/* Back to Top Button */}
-      {showBackToTop && (
-        <button
+      <AnimatePresence>
+        {showBackToTop && (
+          <motion.button
           onClick={scrollToTop}
-          className={`back-to-top-enter fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-xl transform transition-all duration-300 hover:scale-110 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 group ${
+          className={`fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-xl focus:outline-none focus:ring-2 focus:ring-offset-2 group ${
             isDarkMode
-              ? 'bg-white text-black hover:bg-gray-200 focus:ring-white shadow-white/20 hover:shadow-white/40'
-              : 'bg-black text-white hover:bg-gray-800 focus:ring-black shadow-black/20 hover:shadow-black/40'
+              ? 'bg-white text-black hover:bg-gray-200 focus:ring-white shadow-white/20'
+              : 'bg-black text-white hover:bg-gray-800 focus:ring-black shadow-black/20'
           }`}
           aria-label="Back to top"
+          initial={{ opacity: 0, scale: 0, y: 100 }}
+          animate={{ 
+            opacity: 1, 
+            scale: 1, 
+            y: 0,
+            transition: {
+              type: "spring",
+              stiffness: 300,
+              damping: 20
+            }
+          }}
+          exit={{ 
+            opacity: 0, 
+            scale: 0, 
+            y: 100,
+            transition: {
+              duration: 0.2
+            }
+          }}
+          whileHover={{ 
+            scale: 1.1,
+            y: -5,
+            boxShadow: isDarkMode 
+              ? "0 20px 25px -5px rgba(255, 255, 255, 0.3), 0 10px 10px -5px rgba(255, 255, 255, 0.1)"
+              : "0 20px 25px -5px rgba(0, 0, 0, 0.3), 0 10px 10px -5px rgba(0, 0, 0, 0.1)",
+            transition: { duration: 0.2 }
+          }}
+          whileTap={{ scale: 0.9 }}
         >
           {/* Animated Arrow */}
-          <div className="relative w-6 h-6 flex items-center justify-center">
-            <svg 
-              className="w-6 h-6 transform transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-110" 
+          <motion.div 
+            className="relative w-6 h-6 flex items-center justify-center"
+            whileHover={{ y: -2 }}
+          >
+            <motion.svg 
+              className="w-6 h-6" 
               fill="none" 
               stroke="currentColor" 
               viewBox="0 0 24 24"
+              whileHover={{ scale: 1.1 }}
             >
               <path 
                 strokeLinecap="round" 
@@ -1537,33 +1566,66 @@ export default function Home() {
                 strokeWidth={2.5} 
                 d="M5 15l7-7 7 7" 
               />
-            </svg>
+            </motion.svg>
             
-            {/* Pulsing ring effect */}
-            <div className={`absolute inset-0 rounded-full animate-ping opacity-30 ${
-              isDarkMode ? 'bg-white' : 'bg-black'
-            }`}></div>
+            {/* Animated pulsing ring effect */}
+            <motion.div 
+              className={`absolute inset-0 rounded-full opacity-30 ${
+                isDarkMode ? 'bg-white' : 'bg-black'
+              }`}
+              animate={{
+                scale: [1, 1.5, 1],
+                opacity: [0.3, 0, 0.3],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut"
+              }}
+            />
             
             {/* Secondary pulse */}
-            <div className={`absolute inset-0 rounded-full animate-pulse opacity-20 ${
-              isDarkMode ? 'bg-white' : 'bg-black'
-            }`}></div>
-          </div>
+            <motion.div 
+              className={`absolute inset-0 rounded-full opacity-20 ${
+                isDarkMode ? 'bg-white' : 'bg-black'
+              }`}
+              animate={{
+                scale: [1, 1.3, 1],
+                opacity: [0.2, 0, 0.2],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+                delay: 0.5
+              }}
+            />
+          </motion.div>
           
           {/* Tooltip */}
-          <div className={`absolute bottom-full right-0 mb-3 px-3 py-2 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-1 whitespace-nowrap shadow-lg ${
-            isDarkMode 
-              ? 'bg-black text-white border border-gray-700' 
-              : 'bg-white text-black border border-gray-200'
-          }`}>
-        ↑
+          <motion.div 
+            className={`absolute bottom-full right-0 mb-3 px-3 py-2 text-sm rounded-lg whitespace-nowrap shadow-lg ${
+              isDarkMode 
+                ? 'bg-black text-white border border-gray-700' 
+                : 'bg-white text-black border border-gray-200'
+            }`}
+            initial={{ opacity: 0, y: 10, scale: 0.8 }}
+            whileHover={{ 
+              opacity: 1, 
+              y: -5, 
+              scale: 1,
+              transition: { duration: 0.2 }
+            }}
+          >
+            ↑ Back to Top
             {/* Tooltip arrow */}
             <div className={`absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${
               isDarkMode ? 'border-t-black' : 'border-t-white'
             }`}></div>
-          </div>
-        </button>
-      )}
+          </motion.div>
+        </motion.button>
+        )}
+      </AnimatePresence>
 
       {/* CSS Animations */}
       <style jsx>{`

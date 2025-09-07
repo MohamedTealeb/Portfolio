@@ -77,21 +77,11 @@
     transform-style: preserve-3d;
   }
 
-  /* Dynamic planet floating animations */
-  @keyframes planetFloat {
-    0% { transform: translateY(0px) translateX(0px) rotateZ(0deg); }
-    25% { transform: translateY(-15px) translateX(10px) rotateZ(90deg); }
-    50% { transform: translateY(-5px) translateX(-5px) rotateZ(180deg); }
-    75% { transform: translateY(10px) translateX(15px) rotateZ(270deg); }
-    100% { transform: translateY(0px) translateX(0px) rotateZ(360deg); }
-  }
+  /* Simplified planet animations - reduced complexity */
 
   @keyframes planetRotate {
-    0% { transform: rotateY(0deg) rotateX(0deg); }
-    25% { transform: rotateY(90deg) rotateX(15deg); }
-    50% { transform: rotateY(180deg) rotateX(0deg); }
-    75% { transform: rotateY(270deg) rotateX(-15deg); }
-    100% { transform: rotateY(360deg) rotateX(0deg); }
+    0% { transform: rotateY(0deg); }
+    100% { transform: rotateY(360deg); }
   }
 
   @keyframes ringRotate {
@@ -99,42 +89,13 @@
     100% { transform: rotateX(75deg) scale(1.4) rotateZ(360deg); }
   }
 
-  /* Star twinkling with 3D depth */
+  /* Simplified star animations */
   @keyframes starTwinkle {
-    0%, 100% { opacity: 0.3; transform: scale(1) rotateZ(0deg); }
-    50% { opacity: 1; transform: scale(1.2) rotateZ(180deg); }
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.9; }
   }
 
-  @keyframes deepSpaceFloat {
-    0% { transform: translateZ(0px) rotateX(0deg) rotateY(0deg); }
-    25% { transform: translateZ(50px) rotateX(10deg) rotateY(90deg); }
-    50% { transform: translateZ(20px) rotateX(-5deg) rotateY(180deg); }
-    75% { transform: translateZ(80px) rotateX(15deg) rotateY(270deg); }
-    100% { transform: translateZ(0px) rotateX(0deg) rotateY(360deg); }
-  }
-
-  /* Nebula-like glow effect */
-  .cosmic-glow {
-    position: relative;
-  }
-
-  .cosmic-glow::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(138, 43, 226, 0.1) 0%, transparent 70%);
-    border-radius: 50%;
-    animation: cosmicPulse 8s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  @keyframes cosmicPulse {
-    0%, 100% { transform: scale(0.8) rotate(0deg); opacity: 0.3; }
-    50% { transform: scale(1.2) rotate(180deg); opacity: 0.7; }
-  }
+  /* Removed cosmic glow effects for better performance */
 
   /* Orbital motion animations */
   @keyframes orbitSlow {
@@ -166,7 +127,7 @@
     transform: translateY(-50%);
   }
 
-  /* Central Sun glow effect */
+  /* Simplified Central Sun glow effect */
   .central-sun {
     position: relative;
   }
@@ -174,28 +135,14 @@
   .central-sun::before {
     content: '';
     position: absolute;
-    top: -30%;
-    left: -30%;
-    width: 160%;
-    height: 160%;
-    background: radial-gradient(circle, #FFD700 0%, #FFA500 30%, transparent 70%);
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(circle, #FFD700 0%, transparent 60%);
     border-radius: 50%;
-    opacity: 0.4;
-    animation: sunGlow 3s ease-in-out infinite;
-    pointer-events: none;
-  }
-
-  .central-sun::after {
-    content: '';
-    position: absolute;
-    top: -50%;
-    left: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, #FFD700 0%, transparent 50%);
-    border-radius: 50%;
-    opacity: 0.2;
-    animation: sunGlow 6s ease-in-out infinite reverse;
+    opacity: 0.3;
+    animation: sunGlow 4s ease-in-out infinite;
     pointer-events: none;
   }
 
@@ -225,45 +172,19 @@
 
   @keyframes sunGlow {
     0%, 100% { 
-      transform: scale(0.9) rotate(0deg); 
-      opacity: 0.3; 
+      opacity: 0.2; 
     }
     50% { 
-      transform: scale(1.1) rotate(180deg); 
-      opacity: 0.6; 
+      opacity: 0.4; 
     }
   }
 
-  /* Back to Top Button Animations */
-  @keyframes backToTopSlide {
-    0% { 
-      transform: translateY(100px) scale(0.8); 
-      opacity: 0; 
-    }
-    100% { 
-      transform: translateY(0) scale(1); 
-      opacity: 1; 
-    }
-  }
+  /* Back to Top Button animations now handled by framer-motion */
 
-  @keyframes arrowBounce {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-3px); }
-  }
-
-  /* Enhanced back to top button styles */
-  .back-to-top-enter {
-    animation: backToTopSlide 0.3s ease-out;
-  }
-
-  .back-to-top-hover-arrow {
-    animation: arrowBounce 1s ease-in-out infinite;
-  }
-
-  /* Skills Planetary System Animations */
+  /* Simplified Skills Planetary System Animations */
   @keyframes skillOrbit {
-    0% { transform: translate(-50%, -50%) rotate(0deg); }
-    100% { transform: translate(-50%, -50%) rotate(360deg); }
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
   }
 
   /* Skills Central Sun glow effect */
