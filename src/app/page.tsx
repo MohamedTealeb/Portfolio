@@ -6,6 +6,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { ThemeToggleButton } from '@/components/theme-toggle';
 import { useForm, ValidationError } from '@formspree/react';
+import Image from 'next/image';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -16,7 +17,6 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
-  const heroRef = useRef<HTMLDivElement>(null);
   const aboutRef = useRef<HTMLDivElement>(null);
   const skillsRef = useRef<HTMLDivElement>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
@@ -270,11 +270,6 @@ export default function Home() {
       }
     );
 
-    // Toggle dark mode function
-    const toggleDarkMode = () => {
-      setIsDarkMode(!isDarkMode);
-      document.documentElement.classList.toggle('dark');
-    };
 
     // Add bounce class to interactive elements
     document.querySelectorAll('.interactive-card').forEach(card => {
@@ -397,9 +392,10 @@ export default function Home() {
       ScrollTrigger.getAll().forEach(trigger => trigger.kill());
       
       // Remove mouse event listeners
-      if (heroSectionRef.current) {
-        heroSectionRef.current.removeEventListener('mousemove', handleMouseMove);
-        heroSectionRef.current.removeEventListener('mouseleave', () => {});
+      const currentHeroRef = heroSectionRef.current;
+      if (currentHeroRef) {
+        currentHeroRef.removeEventListener('mousemove', handleMouseMove);
+        currentHeroRef.removeEventListener('mouseleave', () => {});
       }
     };
   }, []);
@@ -418,7 +414,7 @@ export default function Home() {
         }))
       );
     }
-  }, [isDarkMode]);
+  }, [isDarkMode, starsData.length]);
 
   // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
@@ -738,7 +734,7 @@ export default function Home() {
             Featured Projects
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {projects.map((project, index) => (
+            {projects.map((project) => (
               <div
                 key={project.title}
                 className={`project-card group rounded-2xl p-4 sm:p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg flex flex-col ${isDarkMode ? 'bg-black bg-opacity-80 backdrop-blur-sm hover:bg-opacity-90' : 'bg-white border-2 border-gray-200 hover:border-gray-300'}`}
@@ -746,9 +742,11 @@ export default function Home() {
                 {/* Project Image */}
                 <div className="w-full h-48 rounded-lg mb-4 overflow-hidden">
                   {project.image ? (
-                    <img
+                    <Image
                       src={project.image}
                       alt={project.title}
+                      width={400}
+                      height={200}
                       className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                     />
                   ) : (
@@ -811,7 +809,7 @@ export default function Home() {
       <section id="contact" className={`py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`} ref={contactRef}>
         <div className="max-w-4xl mx-auto text-center">
           <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent'}`}>
-            Let's Work Together
+            Let&apos;s Work Together
           </h2>
           {/* Contact Form */}
           <div className="max-w-2xl mx-auto mb-8 sm:mb-12">
