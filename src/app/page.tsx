@@ -27,12 +27,19 @@ export default function Home() {
   const typewriterMernRef = useRef<HTMLSpanElement>(null);
   const typewriterStackRef = useRef<HTMLSpanElement>(null);
   const [starsData, setStarsData] = useState<Array<{
-    type: 'star' | 'twinkle' | 'dot';
+    type: 'star' | 'twinkle' | 'dot' | 'planet';
     size: number;
     left: number;
     top: number;
     opacity: number;
     id: string;
+    color?: string;
+    rings?: boolean;
+    depth?: number;
+    orbitRadius?: number;
+    orbitSpeed?: number;
+    orbitCenter?: { x: number; y: number };
+    initialAngle?: number;
   }>>([]);
 
   // Load dark mode from localStorage on component mount
@@ -49,47 +56,91 @@ export default function Home() {
   }, [isDarkMode]);
 
   useEffect(() => {
-    // Generate stars data once on client side
+    // Generate 3D space objects data once on client side
     const generateStarsData = () => {
-      const stars = [];
+      const objects = [];
+      const planetColors = [
+        '#FF6B6B', // Mars-like red
+        '#4ECDC4', // Neptune-like blue
+        '#45B7D1', // Uranus-like cyan
+        '#FFA07A', // Venus-like orange
+        '#98D8C8', // Earth-like green-blue
+        '#F7DC6F', // Jupiter-like yellow
+        '#BB8FCE', // Purple planet
+        '#85C1E9', // Ice planet blue
+      ];
       
-      // Regular stars
-      for (let i = 0; i < 50; i++) {
-        stars.push({
+      // Define orbital centers (gravitational centers)
+      const orbitCenters = [
+        { x: 20, y: 30 }, // Top-left system
+        { x: 75, y: 25 }, // Top-right system
+        { x: 50, y: 70 }, // Bottom-center system
+      ];
+
+      // Planets with orbital system
+      for (let i = 0; i < 6; i++) {
+        const centerIndex = Math.floor(i / 2); // 2 planets per system
+        const isMainPlanet = i % 2 === 0; // Every first planet is larger (like a sun)
+        const orbitRadius = isMainPlanet ? 0 : Math.random() * 150 + 80; // Main planets don't orbit
+        const size = isMainPlanet ? Math.random() * 40 + 60 : Math.random() * 30 + 20;
+        
+        objects.push({
+          type: 'planet' as const,
+          size: size,
+          left: orbitCenters[centerIndex].x,
+          top: orbitCenters[centerIndex].y,
+          opacity: isDarkMode ? Math.random() * 0.8 + 0.6 : Math.random() * 0.7 + 0.5,
+          id: `planet-${i}`,
+          color: planetColors[i % planetColors.length],
+          rings: Math.random() > 0.7, // 30% chance of rings
+          depth: Math.random() * 0.8 + 0.2,
+          orbitRadius: orbitRadius,
+          orbitSpeed: isMainPlanet ? 0 : Math.random() * 0.5 + 0.2, // Main planets don't move
+          orbitCenter: orbitCenters[centerIndex],
+          initialAngle: Math.random() * 360, // Random starting position
+        });
+      }
+      
+      // Regular stars - reduced count
+      for (let i = 0; i < 30; i++) {
+        objects.push({
           type: 'star' as const,
-          size: Math.random() * 20 + 8,
+          size: Math.random() * 15 + 5,
           left: Math.random() * 100,
           top: Math.random() * 100,
-          opacity: isDarkMode ? Math.random() * 0.3 + 0.2 : Math.random() * 0.2 + 0.1,
-          id: `star-${i}`
+          opacity: isDarkMode ? Math.random() * 0.4 + 0.3 : Math.random() * 0.3 + 0.2,
+          id: `star-${i}`,
+          depth: Math.random() * 1 + 0.5,
         });
       }
       
       // Twinkling stars
-      for (let i = 0; i < 30; i++) {
-        stars.push({
+      for (let i = 0; i < 20; i++) {
+        objects.push({
           type: 'twinkle' as const,
-          size: Math.random() * 15 + 6,
+          size: Math.random() * 12 + 4,
           left: Math.random() * 100,
           top: Math.random() * 100,
-          opacity: isDarkMode ? Math.random() * 0.4 + 0.1 : Math.random() * 0.3 + 0.05,
-          id: `twinkle-${i}`
+          opacity: isDarkMode ? Math.random() * 0.5 + 0.2 : Math.random() * 0.4 + 0.1,
+          id: `twinkle-${i}`,
+          depth: Math.random() * 0.8 + 0.3,
         });
       }
       
-      // Dot stars
-      for (let i = 0; i < 40; i++) {
-        stars.push({
+      // Dot stars - distant stars
+      for (let i = 0; i < 25; i++) {
+        objects.push({
           type: 'dot' as const,
-          size: Math.random() * 4 + 2,
+          size: Math.random() * 3 + 1,
           left: Math.random() * 100,
           top: Math.random() * 100,
-          opacity: isDarkMode ? Math.random() * 0.6 + 0.2 : Math.random() * 0.4 + 0.1,
-          id: `dot-star-${i}`
+          opacity: isDarkMode ? Math.random() * 0.7 + 0.3 : Math.random() * 0.5 + 0.2,
+          id: `dot-star-${i}`,
+          depth: Math.random() * 0.5 + 0.1,
         });
       }
       
-      return stars;
+      return objects;
     };
 
     setStarsData(generateStarsData());
@@ -308,46 +359,119 @@ export default function Home() {
       repeat: -1
     });
 
-    // Animated background stars
+    // Enhanced 3D space objects with orbital systems
     if (backgroundRef.current) {
-      const stars = backgroundRef.current.querySelectorAll('.bg-shape');
-      stars.forEach((star, index) => {
-        // Gentle floating movement
-        gsap.to(star, {
-          x: `random(-30, 30)`,
-          y: `random(-20, 20)`,
-          duration: `random(20, 40)`,
+      const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
+      const orbitContainers = backgroundRef.current.querySelectorAll('.orbit-container');
+      
+      // Animate central planets (suns)
+      const centralPlanets = backgroundRef.current.querySelectorAll('.central-planet');
+      centralPlanets.forEach((planet, index) => {
+        // Self rotation
+        gsap.to(planet, {
+          rotationY: 360,
+          duration: `random(12, 18)`,
           ease: 'none',
           repeat: -1,
-          yoyo: true,
-          delay: index * 0.3,
         });
         
-        // Twinkling effect
-        gsap.to(star, {
-          opacity: `random(0.1, 0.8)`,
-          duration: `random(2, 6)`,
+        // Subtle floating movement for central planets
+        gsap.to(planet, {
+          x: `random(-10, 10)`,
+          y: `random(-8, 8)`,
+          duration: `random(40, 60)`,
+          ease: 'power1.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: index * 1,
+        });
+        
+        // Pulsing glow effect
+        gsap.to(planet, {
+          scale: `random(0.95, 1.05)`,
+          duration: `random(6, 10)`,
+          ease: 'power2.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: index * 0.5,
+        });
+      });
+      
+      // Animate orbiting planets
+      const orbitingPlanets = backgroundRef.current.querySelectorAll('.orbiting-planet');
+      orbitingPlanets.forEach((planet, index) => {
+        // Self rotation (different from orbital rotation)
+        gsap.to(planet, {
+          rotationY: 360,
+          duration: `random(8, 15)`,
+          ease: 'none',
+          repeat: -1,
+        });
+        
+        // Slight wobble for realism
+        gsap.to(planet, {
+          rotationX: `random(-5, 5)`,
+          duration: `random(3, 6)`,
           ease: 'power2.inOut',
           repeat: -1,
           yoyo: true,
           delay: index * 0.2,
         });
+      });
+      
+      // Animate orbit containers for slight variations
+      orbitContainers.forEach((container, index) => {
+        // Very subtle orbital plane tilting
+        gsap.to(container, {
+          rotationX: `random(-2, 2)`,
+          rotationZ: `random(-1, 1)`,
+          duration: `random(50, 80)`,
+          ease: 'power1.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: index * 2,
+        });
+      });
+      
+      // Star animations (unchanged but enhanced)
+      const stars = backgroundRef.current.querySelectorAll('.bg-shape:not(.planet-3d)');
+      stars.forEach((star, index) => {
+        gsap.to(star, {
+          x: `random(-15, 15)`,
+          y: `random(-12, 12)`,
+          duration: `random(30, 50)`,
+          ease: 'none',
+          repeat: -1,
+          yoyo: true,
+          delay: index * 0.1,
+        });
+        
+        // Enhanced twinkling for stars
+        gsap.to(star, {
+          opacity: `random(0.3, 1)`,
+          duration: `random(1, 3)`,
+          ease: 'power2.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: index * 0.05,
+        });
 
-        // Scale pulsing for some stars
-        if (index % 3 === 0) {
+        // Scale pulsing with 3D effect
+        if (index % 5 === 0) {
           gsap.to(star, {
             scale: `random(0.8, 1.2)`,
-            duration: `random(3, 8)`,
+            rotationZ: `random(-90, 90)`,
+            duration: `random(5, 12)`,
             ease: 'power1.inOut',
             repeat: -1,
             yoyo: true,
-            delay: index * 0.4,
+            delay: index * 0.2,
           });
         }
       });
     }
 
-    // Mouse interaction with stars
+    // Mouse interaction with 3D space objects
     const handleMouseMove = (e: MouseEvent) => {
       if (heroSectionRef.current && backgroundRef.current) {
         const heroRect = heroSectionRef.current.getBoundingClientRect();
@@ -360,23 +484,43 @@ export default function Home() {
         const normalizedX = (mouseX - centerX) / centerX;
         const normalizedY = (mouseY - centerY) / centerY;
         
-        const stars = backgroundRef.current.querySelectorAll('.bg-shape');
-        stars.forEach((star: Element, index) => {
-          const htmlStar = star as HTMLElement;
+        const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
+        spaceObjects.forEach((object: Element, index) => {
+          const htmlObject = object as HTMLElement;
+          const isPlanet = htmlObject.classList.contains('planet-3d');
           const distance = Math.sqrt(normalizedX * normalizedX + normalizedY * normalizedY);
-          const influence = Math.max(0, 1 - distance);
+          const influence = Math.max(0, 1 - distance * 0.5);
           
-          // Move stars based on mouse position with different speeds
-          const moveX = normalizedX * (20 + index % 10) * influence;
-          const moveY = normalizedY * (15 + index % 8) * influence;
-          
-          gsap.to(htmlStar, {
-            x: moveX,
-            y: moveY,
-            duration: 0.5,
-            ease: 'power2.out',
-            overwrite: 'auto'
-          });
+          if (isPlanet) {
+            // Planets have stronger, more 3D movement
+            const moveX = normalizedX * (30 + index % 15) * influence;
+            const moveY = normalizedY * (25 + index % 12) * influence;
+            const moveZ = normalizedX * normalizedY * 50 * influence;
+            
+            gsap.to(htmlObject, {
+              x: moveX,
+              y: moveY,
+              z: moveZ,
+              rotationY: normalizedX * 45 * influence,
+              rotationX: normalizedY * 30 * influence,
+              duration: 0.8,
+              ease: 'power2.out',
+              overwrite: 'auto'
+            });
+          } else {
+            // Stars have lighter movement
+            const moveX = normalizedX * (15 + index % 8) * influence;
+            const moveY = normalizedY * (12 + index % 6) * influence;
+            
+            gsap.to(htmlObject, {
+              x: moveX,
+              y: moveY,
+              rotationZ: normalizedX * 20 * influence,
+              duration: 0.4,
+              ease: 'power2.out',
+              overwrite: 'auto'
+            });
+          }
         });
       }
     };
@@ -385,17 +529,33 @@ export default function Home() {
     if (heroSectionRef.current) {
       heroSectionRef.current.addEventListener('mousemove', handleMouseMove);
       
-      // Reset stars position when mouse leaves
+      // Reset space objects position when mouse leaves
       heroSectionRef.current.addEventListener('mouseleave', () => {
         if (backgroundRef.current) {
-          const stars = backgroundRef.current.querySelectorAll('.bg-shape');
-          stars.forEach((star: Element) => {
-            gsap.to(star, {
-              x: 0,
-              y: 0,
-              duration: 1,
-              ease: 'power2.out'
-            });
+          const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
+          spaceObjects.forEach((object: Element) => {
+            const htmlObject = object as HTMLElement;
+            const isPlanet = htmlObject.classList.contains('planet-3d');
+            
+            if (isPlanet) {
+              gsap.to(object, {
+                x: 0,
+                y: 0,
+                z: 0,
+                rotationX: 0,
+                rotationY: 0,
+                duration: 1.5,
+                ease: 'power2.out'
+              });
+            } else {
+              gsap.to(object, {
+                x: 0,
+                y: 0,
+                rotationZ: 0,
+                duration: 1,
+                ease: 'power2.out'
+              });
+            }
           });
         }
       });
@@ -414,17 +574,19 @@ export default function Home() {
     };
   }, []);
 
-  // Update stars opacity when dark mode changes
+  // Update space objects opacity when dark mode changes
   useEffect(() => {
     if (starsData.length > 0) {
-      setStarsData(prevStars => 
-        prevStars.map(star => ({
-          ...star,
-          opacity: star.type === 'star' 
-            ? (isDarkMode ? Math.random() * 0.3 + 0.2 : Math.random() * 0.2 + 0.1)
-            : star.type === 'twinkle'
-            ? (isDarkMode ? Math.random() * 0.4 + 0.1 : Math.random() * 0.3 + 0.05)
-            : (isDarkMode ? Math.random() * 0.6 + 0.2 : Math.random() * 0.4 + 0.1)
+      setStarsData(prevObjects => 
+        prevObjects.map(object => ({
+          ...object,
+          opacity: object.type === 'planet'
+            ? (isDarkMode ? Math.random() * 0.8 + 0.6 : Math.random() * 0.7 + 0.5)
+            : object.type === 'star' 
+            ? (isDarkMode ? Math.random() * 0.4 + 0.3 : Math.random() * 0.3 + 0.2)
+            : object.type === 'twinkle'
+            ? (isDarkMode ? Math.random() * 0.5 + 0.2 : Math.random() * 0.4 + 0.1)
+            : (isDarkMode ? Math.random() * 0.7 + 0.3 : Math.random() * 0.5 + 0.2)
         }))
       );
     }
@@ -561,39 +723,140 @@ export default function Home() {
 
       {/* Hero Section */}
       <section id="home" ref={heroSectionRef} className={`relative overflow-hidden pt-24 sm:pt-32 pb-16 sm:pb-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
-        {/* Stars Background - Only in Hero Section */}
-        <div ref={backgroundRef} className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-          {isVisible && starsData.map((star) => (
-            <div
-              key={star.id}
-              className={`bg-shape absolute ${
-                star.type === 'dot' 
-                  ? `rounded-full ${isDarkMode ? 'bg-white' : 'bg-white'}` 
-                  : ''
-              }`}
-              style={{
-                left: `${star.left}%`,
-                top: `${star.top}%`,
-                ...(star.type === 'dot' 
-                  ? {
-                      width: `${star.size}px`,
-                      height: `${star.size}px`,
-                      opacity: star.opacity,
-                      boxShadow: isDarkMode 
-                        ? `0 0 ${star.size * 2}px rgba(255,255,255,0.3)` 
-                        : `0 0 ${star.size * 1.5}px rgba(0,0,0,0.2)`,
-                    }
-                  : {
-                      fontSize: `${star.size}px`,
-                      opacity: star.opacity,
-                      color: isDarkMode ? '#ffffff' : '#000000',
-                    }
-                )
-              }}
-            >
-              {star.type === 'star' ? '⭐' : star.type === 'twinkle' ? '✨' : ''}
-            </div>
-          ))}
+        {/* 3D Space Background with Orbital Systems - Only in Hero Section */}
+        <div ref={backgroundRef} className="absolute inset-0 pointer-events-none z-0 overflow-hidden" style={{ perspective: '1000px' }}>
+          {isVisible && starsData.map((object) => {
+            if (object.type === 'planet') {
+              const isCentralPlanet = object.orbitRadius === 0;
+              const orbitSpeed = object.orbitSpeed || 0;
+              const orbitAnimationName = orbitSpeed > 0.4 ? 'orbitFast' : orbitSpeed > 0.3 ? 'orbitMedium' : 'orbitSlow';
+              const orbitDuration = orbitSpeed > 0 ? `${30 / orbitSpeed}s` : '0s';
+              
+              if (isCentralPlanet) {
+                // Central planet (sun-like)
+                return (
+                  <div
+                    key={object.id}
+                    className={`bg-shape absolute central-planet planet-3d transform-gpu transition-all duration-1000`}
+                    style={{
+                      left: `${object.left}%`,
+                      top: `${object.top}%`,
+                      width: `${object.size}px`,
+                      height: `${object.size}px`,
+                      borderRadius: '50%',
+                      background: `radial-gradient(circle at 30% 30%, ${object.color}ff, ${object.color}aa, ${object.color}44)`,
+                      opacity: object.opacity,
+                      boxShadow: `
+                        0 0 ${object.size * 0.8}px ${object.color}66,
+                        0 0 ${object.size * 1.2}px ${object.color}33,
+                        inset -${object.size * 0.1}px -${object.size * 0.1}px ${object.size * 0.2}px rgba(0,0,0,0.3),
+                        inset ${object.size * 0.05}px ${object.size * 0.05}px ${object.size * 0.1}px rgba(255,255,255,0.4)
+                      `,
+                      transform: `translateZ(${(object.depth || 0.5) * 100}px)`,
+                      animation: `planetRotate ${15}s infinite linear, centralGlow 6s ease-in-out infinite`,
+                      '--planet-color': object.color,
+                    } as React.CSSProperties}
+                  >
+                    {object.rings && (
+                      <div 
+                        className="absolute inset-0 rounded-full border-2 opacity-60"
+                        style={{
+                          borderColor: `${object.color}aa`,
+                          transform: 'rotateX(75deg) scale(1.6)',
+                          borderStyle: 'solid',
+                          borderWidth: '2px',
+                          animation: `ringRotate ${20}s infinite linear`,
+                        }}
+                      />
+                    )}
+                  </div>
+                );
+              } else {
+                // Orbiting planet
+                return (
+                  <div
+                    key={`orbit-${object.id}`}
+                    className="orbit-container"
+                    style={{
+                      left: `${object.orbitCenter?.x}%`,
+                      top: `${object.orbitCenter?.y}%`,
+                      width: `${(object.orbitRadius || 0) * 2}px`,
+                      height: `${(object.orbitRadius || 0) * 2}px`,
+                      '--orbit-radius': `${object.orbitRadius}px`,
+                      animation: `${orbitAnimationName} ${orbitDuration} infinite linear`,
+                      transform: `translate(-50%, -50%) rotate(${object.initialAngle}deg)`,
+                    } as React.CSSProperties}
+                  >
+                    <div
+                      className={`bg-shape orbiting-planet planet-3d transform-gpu`}
+                      style={{
+                        width: `${object.size}px`,
+                        height: `${object.size}px`,
+                        borderRadius: '50%',
+                        background: `radial-gradient(circle at 30% 30%, ${object.color}dd, ${object.color}66, ${object.color}22)`,
+                        opacity: object.opacity,
+                        boxShadow: `
+                          0 0 ${object.size * 0.5}px ${object.color}44,
+                          inset -${object.size * 0.1}px -${object.size * 0.1}px ${object.size * 0.2}px rgba(0,0,0,0.3),
+                          inset ${object.size * 0.05}px ${object.size * 0.05}px ${object.size * 0.1}px rgba(255,255,255,0.2)
+                        `,
+                        transform: `translateZ(${(object.depth || 0.5) * 50}px)`,
+                        animation: `planetRotate ${10 + Math.random() * 10}s infinite linear`,
+                      }}
+                    >
+                      {object.rings && (
+                        <div 
+                          className="absolute inset-0 rounded-full border opacity-50"
+                          style={{
+                            borderColor: `${object.color}66`,
+                            transform: 'rotateX(75deg) scale(1.3)',
+                            borderStyle: 'solid',
+                            borderWidth: '1px',
+                            animation: `ringRotate ${12}s infinite linear`,
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              }
+            } else {
+              // Stars and other objects (unchanged)
+              return (
+                <div
+                  key={object.id}
+                  className={`bg-shape absolute transform-gpu transition-all duration-1000 ${
+                    object.type === 'dot' ? `rounded-full ${isDarkMode ? 'bg-white' : 'bg-white'}` : ''
+                  }`}
+                  style={{
+                    left: `${object.left}%`,
+                    top: `${object.top}%`,
+                    transform: `translateZ(${(object.depth || 0.5) * 100}px)`,
+                    ...(object.type === 'dot' 
+                      ? {
+                          width: `${object.size}px`,
+                          height: `${object.size}px`,
+                          opacity: object.opacity,
+                          boxShadow: isDarkMode 
+                            ? `0 0 ${object.size * 3}px rgba(255,255,255,0.4)` 
+                            : `0 0 ${object.size * 2}px rgba(0,0,0,0.3)`,
+                          filter: `blur(${(1 - (object.depth || 0.5)) * 1}px)`,
+                        }
+                      : {
+                          fontSize: `${object.size}px`,
+                          opacity: object.opacity,
+                          color: isDarkMode ? '#ffffff' : '#000000',
+                          textShadow: `0 0 ${object.size * 0.5}px currentColor`,
+                          filter: `blur(${(1 - (object.depth || 0.5)) * 0.5}px)`,
+                        }
+                    )
+                  }}
+                >
+                  {object.type === 'star' ? '⭐' : object.type === 'twinkle' ? '✨' : ''}
+                </div>
+              );
+            }
+          })}
         </div>
 
         <div className="relative z-10 max-w-6xl mx-auto text-center">
