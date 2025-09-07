@@ -189,4 +189,30 @@
     0%, 100% { transform: scale(0.8); opacity: 0.2; }
     50% { transform: scale(1.2); opacity: 0.4; }
   }
+
+  /* Back to Top Button Animations */
+  @keyframes backToTopSlide {
+    0% { 
+      transform: translateY(100px) scale(0.8); 
+      opacity: 0; 
+    }
+    100% { 
+      transform: translateY(0) scale(1); 
+      opacity: 1; 
+    }
+  }
+
+  @keyframes arrowBounce {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-3px); }
+  }
+
+  /* Enhanced back to top button styles */
+  .back-to-top-enter {
+    animation: backToTopSlide 0.3s ease-out;
+  }
+
+  .back-to-top-hover-arrow {
+    animation: arrowBounce 1s ease-in-out infinite;
+  }
 }

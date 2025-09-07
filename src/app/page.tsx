@@ -18,6 +18,7 @@ export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [isDarkMode, setIsDarkMode] = useState(false);
+  const [showBackToTop, setShowBackToTop] = useState(false);
   const aboutRef = useRef<HTMLDivElement>(null);
   const skillsRef = useRef<HTMLDivElement>(null);
   const projectsRef = useRef<HTMLDivElement>(null);
@@ -54,6 +55,17 @@ export default function Home() {
   useEffect(() => {
     localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
   }, [isDarkMode]);
+
+  // Handle scroll for back-to-top button
+  useEffect(() => {
+    const handleScroll = () => {
+      const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+      setShowBackToTop(scrollTop > 300); // Show after scrolling 300px
+    };
+
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
 
   useEffect(() => {
     // Generate 3D space objects data once on client side
@@ -605,6 +617,15 @@ export default function Home() {
         ease: "power2.inOut"
       });
     }
+  };
+
+  // Back to top function
+  const scrollToTop = () => {
+    gsap.to(window, {
+      duration: 1.5,
+      scrollTo: { y: 0 },
+      ease: "power2.inOut"
+    });
   };
 
   const skills = [
@@ -1248,6 +1269,59 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      {/* Back to Top Button */}
+      {showBackToTop && (
+        <button
+          onClick={scrollToTop}
+          className={`back-to-top-enter fixed bottom-6 right-6 z-50 p-4 rounded-full shadow-xl transform transition-all duration-300 hover:scale-110 hover:-translate-y-1 focus:outline-none focus:ring-2 focus:ring-offset-2 group ${
+            isDarkMode
+              ? 'bg-white text-black hover:bg-gray-200 focus:ring-white shadow-white/20 hover:shadow-white/40'
+              : 'bg-black text-white hover:bg-gray-800 focus:ring-black shadow-black/20 hover:shadow-black/40'
+          }`}
+          aria-label="Back to top"
+        >
+          {/* Animated Arrow */}
+          <div className="relative w-6 h-6 flex items-center justify-center">
+            <svg 
+              className="w-6 h-6 transform transition-all duration-300 group-hover:-translate-y-1 group-hover:scale-110" 
+              fill="none" 
+              stroke="currentColor" 
+              viewBox="0 0 24 24"
+            >
+              <path 
+                strokeLinecap="round" 
+                strokeLinejoin="round" 
+                strokeWidth={2.5} 
+                d="M5 15l7-7 7 7" 
+              />
+            </svg>
+            
+            {/* Pulsing ring effect */}
+            <div className={`absolute inset-0 rounded-full animate-ping opacity-30 ${
+              isDarkMode ? 'bg-white' : 'bg-black'
+            }`}></div>
+            
+            {/* Secondary pulse */}
+            <div className={`absolute inset-0 rounded-full animate-pulse opacity-20 ${
+              isDarkMode ? 'bg-white' : 'bg-black'
+            }`}></div>
+          </div>
+          
+          {/* Tooltip */}
+          <div className={`absolute bottom-full right-0 mb-3 px-3 py-2 text-sm rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 transform group-hover:-translate-y-1 whitespace-nowrap shadow-lg ${
+            isDarkMode 
+              ? 'bg-black text-white border border-gray-700' 
+              : 'bg-white text-black border border-gray-200'
+          }`}>
+        ↑
+            {/* Tooltip arrow */}
+            <div className={`absolute top-full right-4 w-0 h-0 border-l-4 border-r-4 border-t-4 border-transparent ${
+              isDarkMode ? 'border-t-black' : 'border-t-white'
+            }`}></div>
+          </div>
+        </button>
+      )}
     </div>
   );
 }
