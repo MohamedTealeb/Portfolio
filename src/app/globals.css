@@ -166,7 +166,40 @@
     transform: translateY(-50%);
   }
 
-  /* Central planets (suns) glow effect */
+  /* Central Sun glow effect */
+  .central-sun {
+    position: relative;
+  }
+
+  .central-sun::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -30%;
+    width: 160%;
+    height: 160%;
+    background: radial-gradient(circle, #FFD700 0%, #FFA500 30%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: sunGlow 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .central-sun::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, #FFD700 0%, transparent 50%);
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: sunGlow 6s ease-in-out infinite reverse;
+    pointer-events: none;
+  }
+
+  /* Regular central planets */
   .central-planet {
     position: relative;
   }
@@ -188,6 +221,17 @@
   @keyframes centralGlow {
     0%, 100% { transform: scale(0.8); opacity: 0.2; }
     50% { transform: scale(1.2); opacity: 0.4; }
+  }
+
+  @keyframes sunGlow {
+    0%, 100% { 
+      transform: scale(0.9) rotate(0deg); 
+      opacity: 0.3; 
+    }
+    50% { 
+      transform: scale(1.1) rotate(180deg); 
+      opacity: 0.6; 
+    }
   }
 
   /* Back to Top Button Animations */
@@ -214,5 +258,78 @@
 
   .back-to-top-hover-arrow {
     animation: arrowBounce 1s ease-in-out infinite;
+  }
+
+  /* Skills Planetary System Animations */
+  @keyframes skillOrbit {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+  }
+
+  /* Skills Central Sun glow effect */
+  .central-skills-sun {
+    position: relative;
+  }
+
+  .central-skills-sun::before {
+    content: '';
+    position: absolute;
+    top: -30%;
+    left: -30%;
+    width: 160%;
+    height: 160%;
+    background: radial-gradient(circle, #FFD700 0%, #FFA500 30%, transparent 70%);
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: sunGlow 3s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  .central-skills-sun::after {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: radial-gradient(circle, #FFD700 0%, transparent 50%);
+    border-radius: 50%;
+    opacity: 0.2;
+    animation: sunGlow 6s ease-in-out infinite reverse;
+    pointer-events: none;
+  }
+
+  /* Skill Planet hover effects */
+  .skill-planet:hover {
+    transform: scale(1.1) !important;
+    z-index: 20;
+  }
+
+  .skill-planet:hover::before {
+    content: '';
+    position: absolute;
+    top: -20%;
+    left: -20%;
+    width: 140%;
+    height: 140%;
+    background: radial-gradient(circle, currentColor 0%, transparent 60%);
+    border-radius: 50%;
+    opacity: 0.3;
+    animation: skillPlanetGlow 2s ease-in-out infinite;
+    pointer-events: none;
+  }
+
+  @keyframes skillPlanetGlow {
+    0%, 100% { transform: scale(0.8); opacity: 0.2; }
+    50% { transform: scale(1.2); opacity: 0.4; }
+  }
+
+  /* Skill orbit container */
+  .skill-orbit {
+    pointer-events: none;
+  }
+
+  .skill-orbit .skill-planet {
+    pointer-events: all;
   }
 }

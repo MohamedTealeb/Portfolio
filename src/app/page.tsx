@@ -82,33 +82,46 @@ export default function Home() {
         '#85C1E9', // Ice planet blue
       ];
       
-      // Define orbital centers (gravitational centers)
-      const orbitCenters = [
-        { x: 20, y: 30 }, // Top-left system
-        { x: 75, y: 25 }, // Top-right system
-        { x: 50, y: 70 }, // Bottom-center system
-      ];
+      // Central Sun in the middle
+      const sunCenter = { x: 50, y: 50 }; // Center of the screen
+      
+      // Create the central Sun
+      objects.push({
+        type: 'planet' as const,
+        size: 120, // Large central sun
+        left: sunCenter.x,
+        top: sunCenter.y,
+        opacity: isDarkMode ? 0.9 : 0.8,
+        id: 'central-sun',
+        color: '#FFD700', // Golden sun color
+        rings: false,
+        depth: 1,
+        orbitRadius: 0,
+        orbitSpeed: 0,
+        orbitCenter: sunCenter,
+        initialAngle: 0,
+      });
 
-      // Planets with orbital system
-      for (let i = 0; i < 6; i++) {
-        const centerIndex = Math.floor(i / 2); // 2 planets per system
-        const isMainPlanet = i % 2 === 0; // Every first planet is larger (like a sun)
-        const orbitRadius = isMainPlanet ? 0 : Math.random() * 150 + 80; // Main planets don't orbit
-        const size = isMainPlanet ? Math.random() * 40 + 60 : Math.random() * 30 + 20;
+      // Orbiting planets around the central sun
+      const orbitDistances = [160, 220, 280, 340, 400]; // Different orbital distances
+      for (let i = 0; i < 5; i++) {
+        const orbitRadius = orbitDistances[i];
+        const size = Math.random() * 35 + 25; // Planet sizes
+        const orbitSpeed = 0.8 - (i * 0.15); // Closer planets orbit faster
         
         objects.push({
           type: 'planet' as const,
           size: size,
-          left: orbitCenters[centerIndex].x,
-          top: orbitCenters[centerIndex].y,
+          left: sunCenter.x,
+          top: sunCenter.y,
           opacity: isDarkMode ? Math.random() * 0.8 + 0.6 : Math.random() * 0.7 + 0.5,
           id: `planet-${i}`,
           color: planetColors[i % planetColors.length],
-          rings: Math.random() > 0.7, // 30% chance of rings
-          depth: Math.random() * 0.8 + 0.2,
+          rings: Math.random() > 0.8, // 20% chance of rings
+          depth: Math.random() * 0.8 + 0.3,
           orbitRadius: orbitRadius,
-          orbitSpeed: isMainPlanet ? 0 : Math.random() * 0.5 + 0.2, // Main planets don't move
-          orbitCenter: orbitCenters[centerIndex],
+          orbitSpeed: orbitSpeed,
+          orbitCenter: sunCenter,
           initialAngle: Math.random() * 360, // Random starting position
         });
       }
@@ -263,20 +276,17 @@ export default function Home() {
       }
     );
 
-    // Professional skills animation with subtle effects
-    gsap.fromTo('.skill-card',
+    // Planetary Skills System Animation
+    gsap.fromTo('.central-skills-sun',
       { 
         opacity: 0, 
-        y: 20,
-        scale: 0.95
+        scale: 0.5
       },
       {
         opacity: 1,
-        y: 0,
         scale: 1,
-        duration: 0.8,
-        ease: 'power2.out',
-        stagger: 0.06,
+        duration: 1.2,
+        ease: 'elastic.out(1, 0.75)',
         scrollTrigger: {
           trigger: skillsRef.current,
           start: 'top 80%',
@@ -285,33 +295,47 @@ export default function Home() {
       }
     );
 
-    // Subtle floating animation for skills
-    gsap.to('.skill-card', {
-      y: -3,
-      duration: 2.5,
-      ease: 'power1.inOut',
-      repeat: -1,
-      yoyo: true,
-      stagger: {
-        each: 0.15,
-        repeat: -1,
+    // Animate skill planets appearing
+    gsap.fromTo('.skill-planet',
+      { 
+        opacity: 0, 
+        scale: 0,
+        rotationY: -180
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        rotationY: 0,
+        duration: 0.8,
+        ease: 'back.out(1.7)',
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: skillsRef.current,
+          start: 'top 70%',
+          toggleActions: 'play none none reverse',
+        }
       }
-    });
+    );
 
-    // Gentle progress bar animation on scroll
-    gsap.set('.skill-card .transform', { scaleX: 0 });
-    
-    gsap.to('.skill-card .transform', {
-      scaleX: 1,
-      duration: 1.2,
-      ease: 'power2.out',
-      stagger: 0.08,
-      scrollTrigger: {
-        trigger: skillsRef.current,
-        start: 'top 70%',
-        toggleActions: 'play none none reverse',
+    // Animate connection lines
+    gsap.fromTo('.skill-card',
+      { 
+        opacity: 0,
+        scale: 0.5
+      },
+      {
+        opacity: 1,
+        scale: 1,
+        duration: 0.8,
+        ease: 'back.out(1.7)',
+        stagger: 0.1,
+        scrollTrigger: {
+          trigger: skillsRef.current,
+          start: 'top 75%',
+          toggleActions: 'play none none reverse',
+        }
       }
-    });
+    );
 
     // Projects animation
     gsap.fromTo('.project-card',
@@ -376,8 +400,39 @@ export default function Home() {
       const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
       const orbitContainers = backgroundRef.current.querySelectorAll('.orbit-container');
       
-      // Animate central planets (suns)
-      const centralPlanets = backgroundRef.current.querySelectorAll('.central-planet');
+      // Animate central sun
+      const centralSun = backgroundRef.current.querySelector('.central-sun');
+      if (centralSun) {
+        // Slow self rotation for the sun
+        gsap.to(centralSun, {
+          rotationY: 360,
+          duration: 25,
+          ease: 'none',
+          repeat: -1,
+        });
+        
+        // Very subtle floating movement for the sun
+        gsap.to(centralSun, {
+          x: `random(-5, 5)`,
+          y: `random(-3, 3)`,
+          duration: `random(60, 80)`,
+          ease: 'power1.inOut',
+          repeat: -1,
+          yoyo: true,
+        });
+        
+        // Pulsing glow effect for the sun
+        gsap.to(centralSun, {
+          scale: `random(0.98, 1.02)`,
+          duration: `random(8, 12)`,
+          ease: 'power2.inOut',
+          repeat: -1,
+          yoyo: true,
+        });
+      }
+
+      // Animate other central planets (if any)
+      const centralPlanets = backgroundRef.current.querySelectorAll('.central-planet:not(.central-sun)');
       centralPlanets.forEach((planet, index) => {
         // Self rotation
         gsap.to(planet, {
@@ -754,27 +809,41 @@ export default function Home() {
               const orbitDuration = orbitSpeed > 0 ? `${30 / orbitSpeed}s` : '0s';
               
               if (isCentralPlanet) {
-                // Central planet (sun-like)
+                // Check if this is the main central sun
+                const isCentralSun = object.id === 'central-sun';
+                
                 return (
                   <div
                     key={object.id}
-                    className={`bg-shape absolute central-planet planet-3d transform-gpu transition-all duration-1000`}
+                    className={`bg-shape absolute ${isCentralSun ? 'central-sun' : 'central-planet'} planet-3d transform-gpu transition-all duration-1000`}
                     style={{
                       left: `${object.left}%`,
                       top: `${object.top}%`,
                       width: `${object.size}px`,
                       height: `${object.size}px`,
                       borderRadius: '50%',
-                      background: `radial-gradient(circle at 30% 30%, ${object.color}ff, ${object.color}aa, ${object.color}44)`,
+                      background: isCentralSun 
+                        ? `radial-gradient(circle at 30% 30%, #FFD700, #FFA500, #FF8C00)`
+                        : `radial-gradient(circle at 30% 30%, ${object.color}ff, ${object.color}aa, ${object.color}44)`,
                       opacity: object.opacity,
-                      boxShadow: `
-                        0 0 ${object.size * 0.8}px ${object.color}66,
-                        0 0 ${object.size * 1.2}px ${object.color}33,
-                        inset -${object.size * 0.1}px -${object.size * 0.1}px ${object.size * 0.2}px rgba(0,0,0,0.3),
-                        inset ${object.size * 0.05}px ${object.size * 0.05}px ${object.size * 0.1}px rgba(255,255,255,0.4)
-                      `,
-                      transform: `translateZ(${(object.depth || 0.5) * 100}px)`,
-                      animation: `planetRotate ${15}s infinite linear, centralGlow 6s ease-in-out infinite`,
+                      boxShadow: isCentralSun
+                        ? `
+                          0 0 ${object.size * 1}px #FFD700aa,
+                          0 0 ${object.size * 1.5}px #FFA50066,
+                          0 0 ${object.size * 2}px #FF8C0033,
+                          inset -${object.size * 0.1}px -${object.size * 0.1}px ${object.size * 0.15}px rgba(0,0,0,0.2),
+                          inset ${object.size * 0.08}px ${object.size * 0.08}px ${object.size * 0.12}px rgba(255,255,255,0.6)
+                        `
+                        : `
+                          0 0 ${object.size * 0.8}px ${object.color}66,
+                          0 0 ${object.size * 1.2}px ${object.color}33,
+                          inset -${object.size * 0.1}px -${object.size * 0.1}px ${object.size * 0.2}px rgba(0,0,0,0.3),
+                          inset ${object.size * 0.05}px ${object.size * 0.05}px ${object.size * 0.1}px rgba(255,255,255,0.4)
+                        `,
+                      transform: `translateZ(${(object.depth || 0.5) * 100}px) translate(-50%, -50%)`,
+                      animation: isCentralSun 
+                        ? `planetRotate ${20}s infinite linear, sunGlow 4s ease-in-out infinite`
+                        : `planetRotate ${15}s infinite linear, centralGlow 6s ease-in-out infinite`,
                       '--planet-color': object.color,
                     } as React.CSSProperties}
                   >
@@ -1001,40 +1070,90 @@ export default function Home() {
           <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 lg:mb-16 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>
             Technical Skills
           </h2>
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 max-w-6xl mx-auto">
-            {skills.map((skill, index) => (
-              <div
-                key={skill.name}
-                className={`skill-card group relative p-6 rounded-xl transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:-translate-y-2 cursor-pointer border ${isDarkMode ? 'bg-white bg-opacity-5 backdrop-blur-sm border-white border-opacity-20 hover:bg-opacity-10 hover:border-opacity-40' : 'bg-white border-gray-200 hover:border-gray-300 shadow-md hover:shadow-lg'}`}
+          
+          {/* Planetary Skills System */}
+          <div className="relative w-full h-[500px] sm:h-[550px] lg:h-[600px] mx-auto overflow-hidden">
+            {/* Central Sun - Core Technologies */}
+            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
+              <div className={`central-skills-sun w-24 h-24 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full flex flex-col items-center justify-center transition-all duration-300 ${isDarkMode ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500' : 'bg-gradient-to-br from-yellow-300 via-orange-400 to-red-400'}`}
+                style={{
+                  boxShadow: isDarkMode 
+                    ? `0 0 60px rgba(255, 215, 0, 0.6), 0 0 100px rgba(255, 165, 0, 0.4), 0 0 140px rgba(255, 140, 0, 0.2)`
+                    : `0 0 60px rgba(255, 215, 0, 0.5), 0 0 100px rgba(255, 165, 0, 0.3), 0 0 140px rgba(255, 140, 0, 0.1)`,
+                  animation: 'sunGlow 4s ease-in-out infinite, planetRotate 20s infinite linear'
+                }}
               >
-                {/* Skill Icon */}
-                <div className="flex justify-center mb-4">
-                  <div className={`w-16 h-16 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300 group-hover:scale-110 bg-gradient-to-br ${skill.color} text-white shadow-lg`}>
-                    {skill.icon}
+                <div className="text-center w-full h-full flex flex-col items-center justify-center">
+                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight`}>
+                    MERN
+                  </div>
+                  <div className={`text-xs sm:text-xs lg:text-sm text-white opacity-90 mt-0.5`}>
+                    Core Stack
                   </div>
                 </div>
-                
-                {/* Skill Name */}
-                <h3 className={`text-center font-semibold text-base mb-2 transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>
-                  {skill.name}
-                </h3>
-                
-                {/* Category Badge */}
-                <div className="flex justify-center">
-                  <span className={`px-3 py-1 text-xs font-medium rounded-full transition-all duration-300 ${isDarkMode ?'bg-gray-100 text-gray-600' : 'bg-gray-100 text-gray-600'}`}>
-                    {skill.category}
-                  </span>
-                </div>
-                
-                {/* Progress Bar */}
-                <div className={`mt-4 h-1 rounded-full overflow-hidden ${isDarkMode ? 'bg-white bg-opacity-20' : 'bg-gray-200'}`}>
-                  <div 
-                    className={`h-full bg-gradient-to-r ${skill.color} transition-all duration-1000 group-hover:w-full transform origin-left scale-x-0`}
-                    style={{ '--target-width': `${70 + (index % 4) * 10}%` } as React.CSSProperties}
-                  ></div>
-                </div>
               </div>
-            ))}
+            </div>
+
+            {/* Single Orbital Path */}
+            <div
+              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-20"
+              style={{
+                width: `${180 * 2}px`,
+                height: `${180 * 2}px`,
+                borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
+                borderStyle: 'dashed',
+                borderWidth: '1px',
+              }}
+            />
+
+            {/* Orbiting Skills */}
+            {skills.map((skill, index) => {
+              const orbitRadius = 180; // Single orbit radius
+              const sunRadius = 48; // Average sun radius (responsive) - smaller size
+              const lineLength = orbitRadius - sunRadius; // Line from sun edge to skill
+              const angleStep = 360 / skills.length; // Divide circle evenly
+              const angle = index * angleStep; // Position each skill evenly around circle
+              
+              // Calculate position using trigonometry
+              const x = Math.cos((angle * Math.PI) / 180) * orbitRadius;
+              const y = Math.sin((angle * Math.PI) / 180) * orbitRadius;
+
+              return (
+                <div key={skill.name}>
+                  {/* Connection Line from Sun Edge to Skill */}
+                  <div 
+                    className="absolute top-1/2 left-1/2 origin-left transform -translate-y-1/2"
+                    style={{
+                      width: `${lineLength}px`,
+                      height: '3px',
+                      background: isDarkMode 
+                        ? `linear-gradient(to right, rgba(255, 215, 0, 0.9), rgba(255, 215, 0, 0.5))`
+                        : `linear-gradient(to right, rgba(255, 165, 0, 0.8), rgba(255, 165, 0, 0.4))`,
+                      transform: `translate(-50%, -50%) rotate(${angle}deg) translateX(${sunRadius}px)`,
+                      transformOrigin: 'left center',
+                      opacity: 0.9,
+                      borderRadius: '2px',
+                    }}
+                  />
+                  
+                  {/* Skill Planet - Fixed position */}
+                  <div
+                    className={`skill-card skill-planet group absolute transition-all duration-500 hover:scale-110 hover:shadow-xl cursor-pointer border min-w-fit whitespace-nowrap flex items-center justify-center px-4 py-3 rounded-full ${isDarkMode ? 'bg-white bg-opacity-15 backdrop-blur-sm border-white border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60' : 'bg-white border-gray-200 hover:border-gray-300 shadow-md hover:shadow-lg'}`}
+                    style={{
+                      left: `calc(50% + ${x}px)`,
+                      top: `calc(50% + ${y}px)`,
+                      transform: 'translate(-50%, -50%)',
+                      boxShadow: `0 0 20px ${skill.color.includes('from-') ? skill.color.split('from-')[1].split(' ')[0].replace('-500', '').replace('-600', '').replace('-700', '') : '#000'}44`,
+                    }}
+                  >
+                    {/* Skill Name Only */}
+                    <h3 className={`text-center font-semibold text-sm lg:text-base transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>
+                      {skill.name}
+                    </h3>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       </section>
