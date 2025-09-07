@@ -400,6 +400,33 @@ export default function Home() {
       const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
       const orbitContainers = backgroundRef.current.querySelectorAll('.orbit-container');
       
+      // Animate extended background objects in about section
+      const aboutBgObjects = document.querySelectorAll('[key^="about-"]');
+      aboutBgObjects.forEach((object: Element, index) => {
+        const htmlObject = object as HTMLElement;
+        
+        // Subtle floating animation for about section stars
+        gsap.to(htmlObject, {
+          x: `random(-8, 8)`,
+          y: `random(-6, 6)`,
+          duration: `random(25, 40)`,
+          ease: 'none',
+          repeat: -1,
+          yoyo: true,
+          delay: index * 0.2,
+        });
+        
+        // Gentle twinkling for about section
+        gsap.to(htmlObject, {
+          opacity: `random(0.2, 0.8)`,
+          duration: `random(2, 4)`,
+          ease: 'power2.inOut',
+          repeat: -1,
+          yoyo: true,
+          delay: index * 0.1,
+        });
+      });
+      
       // Animate central sun
       const centralSun = backgroundRef.current.querySelector('.central-sun');
       if (centralSun) {
@@ -995,8 +1022,61 @@ export default function Home() {
       </section>
 
       {/* About Section */}
-      <section id="about" className={`py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`} ref={aboutRef}>
-        <div className="max-w-4xl mx-auto">
+      <section id="about" className={`relative overflow-hidden py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`} ref={aboutRef}>
+        {/* Extended Space Background */}
+        <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden" style={{ perspective: '1000px' }}>
+          {/* Gradient overlay for smooth transition */}
+          <div 
+            className={`absolute inset-0 ${isDarkMode 
+              ? 'bg-gradient-to-b from-black/40 via-black/20 to-black/40' 
+              : 'bg-gradient-to-b from-white/30 via-white/10 to-white/30'
+            }`}
+            style={{ zIndex: 1 }}
+          />
+          
+          {isVisible && starsData.slice(5, 25).map((object) => {
+            // Use a subset of stars and space objects for the about section
+            if (object.type === 'planet') {
+              return null; // Skip planets in about section to avoid overcrowding
+            }
+            
+            return (
+              <div
+                key={`about-${object.id}`}
+                className={`bg-shape absolute transform-gpu transition-all duration-1000 ${
+                  object.type === 'dot' ? `rounded-full ${isDarkMode ? 'bg-white' : 'bg-white'}` : ''
+                }`}
+                style={{
+                  left: `${object.left}%`,
+                  top: `${object.top + 20}%`, // Offset to continue from hero
+                  transform: `translateZ(${(object.depth || 0.5) * 50}px)`, // Reduced depth for subtlety
+                  ...(object.type === 'dot' 
+                    ? {
+                        width: `${object.size * 0.7}px`, // Smaller dots
+                        height: `${object.size * 0.7}px`,
+                        opacity: object.opacity * 0.6, // More subtle
+                        boxShadow: isDarkMode 
+                          ? `0 0 ${object.size * 2}px rgba(255,255,255,0.3)` 
+                          : `0 0 ${object.size * 1.5}px rgba(0,0,0,0.2)`,
+                        filter: `blur(${(1 - (object.depth || 0.5)) * 0.8}px)`,
+                      }
+                    : {
+                        fontSize: `${object.size * 0.6}px`, // Smaller stars
+                        opacity: object.opacity * 0.5, // More subtle
+                        color: isDarkMode ? '#ffffff' : '#000000',
+                        textShadow: `0 0 ${object.size * 0.3}px currentColor`,
+                        filter: `blur(${(1 - (object.depth || 0.5)) * 0.3}px)`,
+                      }
+                  )
+                }}
+              >
+                {object.type === 'star' ? '⭐' : object.type === 'twinkle' ? '✨' : ''}
+              </div>
+            );
+          })}
+        </div>
+
+        <div className="relative z-10 max-w-4xl mx-auto">
           <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>
             Personal Information
           </h2>
@@ -1072,82 +1152,125 @@ export default function Home() {
           </h2>
           
           {/* Planetary Skills System */}
-          <div className="relative w-full h-[500px] sm:h-[550px] lg:h-[600px] mx-auto overflow-hidden">
-            {/* Central Sun - Core Technologies */}
-            <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 z-10">
-              <div className={`central-skills-sun w-24 h-24 sm:w-32 sm:h-32 lg:w-36 lg:h-36 rounded-full flex flex-col items-center justify-center transition-all duration-300 ${isDarkMode ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-500' : 'bg-gradient-to-br from-yellow-300 via-orange-400 to-red-400'}`}
-                style={{
-                  boxShadow: isDarkMode 
-                    ? `0 0 60px rgba(255, 215, 0, 0.6), 0 0 100px rgba(255, 165, 0, 0.4), 0 0 140px rgba(255, 140, 0, 0.2)`
-                    : `0 0 60px rgba(255, 215, 0, 0.5), 0 0 100px rgba(255, 165, 0, 0.3), 0 0 140px rgba(255, 140, 0, 0.1)`,
-                  animation: 'sunGlow 4s ease-in-out infinite, planetRotate 20s infinite linear'
-                }}
-              >
-                <div className="text-center w-full h-full flex flex-col items-center justify-center">
-                  <div className={`text-xl sm:text-2xl lg:text-3xl font-bold text-white leading-tight`}>
-                    MERN
-                  </div>
-                  <div className={`text-xs sm:text-xs lg:text-sm text-white opacity-90 mt-0.5`}>
-                    Core Stack
-                  </div>
-                </div>
+          <div className="relative w-full h-[400px] xs:h-[450px] sm:h-[600px] md:h-[700px] lg:h-[800px] mx-auto overflow-hidden">
+
+            {/* Central Sun - Mobile */}
+            <div
+              className={`sm:hidden central-skills-sun absolute transition-all duration-500 hover:scale-110 cursor-pointer rounded-full flex items-center justify-center border-2 ${isDarkMode ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 border-yellow-300 shadow-[0_0_20px_rgba(255,215,0,0.7),0_0_40px_rgba(255,165,0,0.5)]' : 'bg-gradient-to-br from-yellow-300 via-orange-400 to-red-500 border-yellow-400 shadow-[0_0_15px_rgba(255,165,0,0.6),0_0_30px_rgba(255,140,0,0.4)]'}`}
+              style={{
+                left: 'calc(50% - 5px)',
+                top: '50%',
+                width: '70px', // Smaller for mobile
+                height: '70px', // Smaller for mobile
+                transform: 'translate(-50%, -50%)',
+                zIndex: 20,
+              }}
+            >
+              <div className={`text-center transition-colors duration-300`}>
+                <div className={`text-xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-white'}`}>☀️</div>
               </div>
             </div>
 
-            {/* Single Orbital Path */}
+            {/* Central Sun - Desktop */}
             <div
-              className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 rounded-full border opacity-20"
+              className={`hidden sm:flex central-skills-sun absolute transition-all duration-500 hover:scale-110 cursor-pointer rounded-full items-center justify-center border-4 ${isDarkMode ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 border-yellow-300 shadow-[0_0_40px_rgba(255,215,0,0.9),0_0_80px_rgba(255,165,0,0.7),0_0_120px_rgba(255,140,0,0.4)]' : 'bg-gradient-to-br from-yellow-300 via-orange-400 to-red-500 border-yellow-400 shadow-[0_0_35px_rgba(255,165,0,0.8),0_0_70px_rgba(255,140,0,0.6)]'}`}
               style={{
-                width: `${180 * 2}px`,
-                height: `${180 * 2}px`,
-                borderColor: isDarkMode ? 'rgba(255, 255, 255, 0.2)' : 'rgba(0, 0, 0, 0.1)',
-                borderStyle: 'dashed',
-                borderWidth: '1px',
+                left: 'calc(50% - 10px)',
+                top: '50%',
+                width: '128px', // w-32 equivalent
+                height: '128px', // h-32 equivalent
+                transform: 'translate(-50%, -50%)',
+                zIndex: 20,
               }}
-            />
+            >
+              <div className={`text-center transition-colors duration-300`}>
+                <div className={`text-4xl font-bold transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-white'}`}>☀️</div>
+              </div>
+            </div>
 
             {/* Orbiting Skills */}
             {skills.map((skill, index) => {
-              const orbitRadius = 180; // Single orbit radius
-              const sunRadius = 48; // Average sun radius (responsive) - smaller size
-              const lineLength = orbitRadius - sunRadius; // Line from sun edge to skill
-              const angleStep = 360 / skills.length; // Divide circle evenly
-              const angle = index * angleStep; // Position each skill evenly around circle
+              // Larger orbit radiuses for bigger and wider system
+              const orbitRadius = 280; // Increased more for better spacing
+              const sunRadius = 64; // Updated for larger sun (w-40-48 average)
+              const lineLength = orbitRadius - sunRadius;
+              const angleStep = 360 / skills.length;
+              const angle = index * angleStep;
               
-              // Calculate position using trigonometry
-              const x = Math.cos((angle * Math.PI) / 180) * orbitRadius;
-              const y = Math.sin((angle * Math.PI) / 180) * orbitRadius;
+              // Calculate positions for both mobile and desktop
+              const mobileOrbitRadius = 160; // Reduced for better mobile fit
+              const mobileSunRadius = 48; // Updated for larger mobile sun (w-32)
+              const mobileLineLength = mobileOrbitRadius - mobileSunRadius;
+              
+              // Desktop positions (adjusted for sun position)
+              const xDesktop = Math.cos((angle * Math.PI) / 180) * orbitRadius - 10;
+              const yDesktop = Math.sin((angle * Math.PI) / 180) * orbitRadius;
+              
+              // Mobile positions (adjusted for sun position)
+              const xMobile = Math.cos((angle * Math.PI) / 180) * mobileOrbitRadius - 5;
+              const yMobile = Math.sin((angle * Math.PI) / 180) * mobileOrbitRadius;
 
               return (
                 <div key={skill.name}>
-                  {/* Connection Line from Sun Edge to Skill */}
-                  <div 
-                    className="absolute top-1/2 left-1/2 origin-left transform -translate-y-1/2"
+                  {/* Connection Line - Mobile */}
+                  <div
+                    className={`sm:hidden absolute transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600' : 'bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500'}`}
                     style={{
-                      width: `${lineLength}px`,
-                      height: '3px',
-                      background: isDarkMode 
-                        ? `linear-gradient(to right, rgba(255, 215, 0, 0.9), rgba(255, 215, 0, 0.5))`
-                        : `linear-gradient(to right, rgba(255, 165, 0, 0.8), rgba(255, 165, 0, 0.4))`,
-                      transform: `translate(-50%, -50%) rotate(${angle}deg) translateX(${sunRadius}px)`,
+                      left: `calc(50% - 5px)`,
+                      top: `calc(50%)`,
+                      width: `${mobileLineLength}px`,
+                      height: '1.5px',
                       transformOrigin: 'left center',
-                      opacity: 0.9,
-                      borderRadius: '2px',
+                      transform: `rotate(${angle}deg)`,
+                      opacity: 0.5,
+                      zIndex: 5,
+                      boxShadow: `0 0 6px ${isDarkMode ? 'rgba(255,215,0,0.4)' : 'rgba(255,165,0,0.3)'}`,
                     }}
                   />
                   
-                  {/* Skill Planet - Fixed position */}
+                  {/* Connection Line - Desktop */}
                   <div
-                    className={`skill-card skill-planet group absolute transition-all duration-500 hover:scale-110 hover:shadow-xl cursor-pointer border min-w-fit whitespace-nowrap flex items-center justify-center px-4 py-3 rounded-full ${isDarkMode ? 'bg-white bg-opacity-15 backdrop-blur-sm border-white border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60' : 'bg-white border-gray-200 hover:border-gray-300 shadow-md hover:shadow-lg'}`}
+                    className={`hidden sm:block absolute transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600' : 'bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500'}`}
                     style={{
-                      left: `calc(50% + ${x}px)`,
-                      top: `calc(50% + ${y}px)`,
+                      left: `calc(50% - 10px)`,
+                      top: `calc(50%)`,
+                      width: `${lineLength}px`,
+                      height: '3px',
+                      transformOrigin: 'left center',
+                      transform: `rotate(${angle}deg)`,
+                      opacity: 0.7,
+                      zIndex: 5,
+                      boxShadow: `0 0 12px ${isDarkMode ? 'rgba(255,215,0,0.6)' : 'rgba(255,165,0,0.5)'}`,
+                    }}
+                  />
+                  {/* Skill Planet - Mobile Position */}
+                  <div
+                    className={`sm:hidden skill-card skill-planet group absolute transition-all duration-500 hover:scale-105 hover:shadow-lg cursor-pointer border min-w-fit whitespace-nowrap flex items-center justify-center px-1.5 py-1 rounded-full ${isDarkMode ? 'bg-white bg-opacity-15 backdrop-blur-sm border-white border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60' : 'bg-white border-gray-200 hover:border-gray-300 shadow-md hover:shadow-lg'}`}
+                    style={{
+                      left: `calc(50% + ${xMobile}px)`,
+                      top: `calc(50% + ${yMobile}px)`,
                       transform: 'translate(-50%, -50%)',
-                      boxShadow: `0 0 20px ${skill.color.includes('from-') ? skill.color.split('from-')[1].split(' ')[0].replace('-500', '').replace('-600', '').replace('-700', '') : '#000'}44`,
+                      boxShadow: `0 0 10px ${skill.color.includes('from-') ? skill.color.split('from-')[1].split(' ')[0].replace('-500', '').replace('-600', '').replace('-700', '') : '#000'}33`,
+                      zIndex: 10,
                     }}
                   >
-                    {/* Skill Name Only */}
-                    <h3 className={`text-center font-semibold text-sm lg:text-base transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>
+                    <h3 className={`text-center font-semibold text-[10px] transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>
+                      {skill.name}
+                    </h3>
+                  </div>
+                  
+                  {/* Skill Planet - Desktop Position */}
+                  <div
+                    className={`hidden sm:flex skill-card skill-planet group absolute transition-all duration-500 hover:scale-110 hover:shadow-xl cursor-pointer border min-w-fit whitespace-nowrap items-center justify-center px-3 py-2 md:px-4 md:py-3 rounded-full ${isDarkMode ? 'bg-white bg-opacity-15 backdrop-blur-sm border-white border-opacity-40 hover:bg-opacity-25 hover:border-opacity-60' : 'bg-white border-gray-200 hover:border-gray-300 shadow-md hover:shadow-lg'}`}
+                    style={{
+                      left: `calc(50% + ${xDesktop}px)`,
+                      top: `calc(50% + ${yDesktop}px)`,
+                      transform: 'translate(-50%, -50%)',
+                      boxShadow: `0 0 20px ${skill.color.includes('from-') ? skill.color.split('from-')[1].split(' ')[0].replace('-500', '').replace('-600', '').replace('-700', '') : '#000'}44`,
+                      zIndex: 10,
+                    }}
+                  >
+                    <h3 className={`text-center font-semibold text-sm md:text-sm lg:text-base transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>
                       {skill.name}
                     </h3>
                   </div>
@@ -1441,6 +1564,35 @@ export default function Home() {
           </div>
         </button>
       )}
+
+      {/* CSS Animations */}
+      <style jsx>{`
+        .central-skills-sun {
+          animation: sunPulse 4s ease-in-out infinite, sunRotate 20s linear infinite;
+        }
+        
+        @keyframes sunPulse {
+          0%, 100% {
+            transform: translate(-50%, -50%) scale(1);
+          }
+          50% {
+            transform: translate(-50%, -50%) scale(1.05);
+          }
+        }
+        
+        @keyframes sunRotate {
+          from {
+            transform: translate(-50%, -50%) rotate(0deg);
+          }
+          to {
+            transform: translate(-50%, -50%) rotate(360deg);
+          }
+        }
+        
+        .central-skills-sun:hover {
+          animation: sunPulse 2s ease-in-out infinite, sunRotate 10s linear infinite;
+        }
+      `}</style>
     </div>
   );
 }
