@@ -35,6 +35,19 @@ export default function Home() {
     id: string;
   }>>([]);
 
+  // Load dark mode from localStorage on component mount
+  useEffect(() => {
+    const savedDarkMode = localStorage.getItem('darkMode');
+    if (savedDarkMode !== null) {
+      setIsDarkMode(JSON.parse(savedDarkMode));
+    }
+  }, []);
+
+  // Save dark mode to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('darkMode', JSON.stringify(isDarkMode));
+  }, [isDarkMode]);
+
   useEffect(() => {
     // Generate stars data once on client side
     const generateStarsData = () => {
@@ -415,7 +428,7 @@ export default function Home() {
         }))
       );
     }
-  }, [isDarkMode, starsData.length]);
+  }, [isDarkMode]);
 
   // Smooth scroll function
   const scrollToSection = (sectionId: string) => {
