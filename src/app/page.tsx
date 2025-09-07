@@ -5,6 +5,7 @@ import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { ThemeToggleButton } from '@/components/theme-toggle';
+import { useForm, ValidationError } from '@formspree/react';
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -185,16 +186,20 @@ export default function Home() {
       }
     );
 
-    // Skills animation - floating effect
+    // Professional skills animation with subtle effects
     gsap.fromTo('.skill-card',
-      { opacity: 0, scale: 0, y: 100 },
+      { 
+        opacity: 0, 
+        y: 20,
+        scale: 0.95
+      },
       {
         opacity: 1,
-        scale: 1,
         y: 0,
+        scale: 1,
         duration: 0.8,
-        ease: 'elastic.out(1, 0.5)',
-        stagger: 0.15,
+        ease: 'power2.out',
+        stagger: 0.06,
         scrollTrigger: {
           trigger: skillsRef.current,
           start: 'top 80%',
@@ -203,16 +208,31 @@ export default function Home() {
       }
     );
 
-    // Add floating animation to skills
+    // Subtle floating animation for skills
     gsap.to('.skill-card', {
-      y: '+=10',
-      duration: 2,
+      y: -3,
+      duration: 2.5,
       ease: 'power1.inOut',
       repeat: -1,
       yoyo: true,
       stagger: {
-        each: 0.2,
+        each: 0.15,
         repeat: -1,
+      }
+    });
+
+    // Gentle progress bar animation on scroll
+    gsap.set('.skill-card .transform', { scaleX: 0 });
+    
+    gsap.to('.skill-card .transform', {
+      scaleX: 1,
+      duration: 1.2,
+      ease: 'power2.out',
+      stagger: 0.08,
+      scrollTrigger: {
+        trigger: skillsRef.current,
+        start: 'top 70%',
+        toggleActions: 'play none none reverse',
       }
     });
 
@@ -413,43 +433,68 @@ export default function Home() {
   };
 
   const skills = [
-    { name: 'MongoDB', icon: '🍃', color: 'bg-green-500' },
-    { name: 'Express.js', icon: '⚡', color: 'bg-gray-700' },
-    { name: 'React', icon: '⚛️', color: 'bg-blue-500' },
-    { name: 'Node.js', icon: '🟢', color: 'bg-green-600' },
-    { name: 'TypeScript', icon: '📘', color: 'bg-blue-600' },
-    { name: 'Next.js', icon: '▲', color: 'bg-white' },
-    { name: 'Tailwind CSS', icon: '🎨', color: 'bg-cyan-500' },
-    { name: 'Git', icon: '📚', color: 'bg-orange-500' }
+    { name: 'MongoDB', icon: 'M', category: 'Database', color: 'from-green-500 to-green-600' },
+    { name: 'Express.js', icon: 'E', category: 'Backend', color: 'from-gray-600 to-gray-700' },
+    { name: 'React', icon: 'R', category: 'Frontend', color: 'from-blue-500 to-blue-600' },
+    { name: 'Node.js', icon: 'N', category: 'Backend', color: 'from-green-600 to-green-700' },
+    { name: 'TypeScript', icon: 'TS', category: 'Language', color: 'from-blue-600 to-blue-700' },
+    { name: 'JavaScript', icon: 'JS', category: 'Language', color: 'from-yellow-500 to-yellow-600' },
+    { name: 'SQL', icon: 'SQL', category: 'Database', color: 'from-indigo-500 to-indigo-600' },
+    { name: 'Next.js', icon: 'N', category: 'Framework', color: 'from-gray-800 to-black' },
+    { name: 'Tailwind', icon: 'TW', category: 'Styling', color: 'from-cyan-500 to-cyan-600' },
+    { name: 'Material-UI', icon: 'MUI', category: 'UI Library', color: 'from-blue-600 to-purple-600' },
+    { name: 'Shadcn/UI', icon: 'SH', category: 'UI Library', color: 'from-purple-500 to-purple-600' },
+    { name: 'Git', icon: 'Git', category: 'Version Control', color: 'from-orange-500 to-orange-600' },
+    { name: 'Docker', icon: 'D', category: 'DevOps', color: 'from-blue-500 to-blue-600' },
+    { name: 'AWS', icon: 'AWS', category: 'Cloud', color: 'from-orange-400 to-orange-500' },
+    { name: 'React Query', icon: 'RQ', category: 'Data Fetching', color: 'from-red-500 to-pink-600' },
+    { name: 'Redux', icon: 'RX', category: 'State Mgmt', color: 'from-purple-600 to-purple-700' }
   ];
 
   const projects = [
     {
-      title: 'E-Commerce Platform',
-      description: 'Full-stack e-commerce application with user authentication, product catalog, shopping cart, and payment integration.',
-      tech: ['React', 'Node.js', 'MongoDB', 'Express.js', 'Stripe'],
-      features: ['User Authentication', 'Payment Processing', 'Admin Dashboard', 'Real-time Updates'],
-      github: '#',
-      demo: '#'
+      title: 'Online Coaching Platform',
+      description: 'Developed a front-end web application using React.js and Tailwind CSS with static data. Created a public landing page showcasing offers, contact details, and social media links.',
+      tech: ['React.js', 'Tailwind CSS', 'JavaScript'],
+      features: ['Login Simulation', 'Diet Plans Display', 'Workout Routines', 'Responsive UI'],
+      demo: 'https://online-coach-sigma.vercel.app/',
+      image: '/projects/Screenshot 2025-09-07 110553.png'
     },
     {
-      title: 'Social Media App',
-      description: 'Real-time social media platform with posts, comments, likes, and user profiles.',
-      tech: ['React', 'Node.js', 'MongoDB', 'Socket.io', 'JWT'],
-      features: ['Real-time Chat', 'Image Upload', 'User Profiles', 'Post Interactions'],
-      github: '#',
-      demo: '#'
+      title: 'IPEK E-commerce Website',
+      description: 'Freelance E-commerce Website - Implemented state management using React Context API for efficient data flow. Built a user-friendly product catalog for mattresses and accessories.',
+      tech: ['React.js', 'Context API', 'CSS'],
+      features: ['Product Catalog', 'Admin Dashboard', 'Order Management', 'Clean Design'],
+      demo: 'https://ipck.vercel.app/',
+      image: '/projects/Screenshot 2025-09-07 110720.png'
     },
     {
-      title: 'Task Management System',
-      description: 'Collaborative project management tool with team features and real-time updates.',
-      tech: ['Next.js', 'TypeScript', 'MongoDB', 'Express.js'],
-      features: ['Team Collaboration', 'Task Tracking', 'File Sharing', 'Progress Analytics'],
-      github: '#',
-      demo: '#'
+      title: 'RYO T-shirt Store',
+      description: 'Freelance E-commerce Website - Developed a responsive e-commerce website for selling T-shirts using React.js and Material-UI.',
+      tech: ['React.js', 'Material-UI', 'JavaScript'],
+      features: ['Product Inventory', 'Size Management', 'Order Tracking', 'Admin Dashboard'],
+      demo: 'https://ve-client.vercel.app/',
+        image: '/projects/Screenshot 2025-09-07 110916.png'
+    },
+    {
+      title: 'E-MO Multilingual Website',
+      description: 'Freelance Project – Multilingual Website Development. Developed a responsive web application using Next.js with translations in Dutch and French.',
+      tech: ['Next.js', 'JavaScript', 'CSS'],
+      features: ['Multilingual Support', 'SEO Optimization', 'Responsive Design', 'Performance Optimization'],
+      demo: 'https://e-mo-two.vercel.app/',
+      image: '/projects/Screenshot 2025-09-07 110954.png'
+    },
+    {
+      title: 'Fajr Al-Khair Charity Platform',
+      description: 'Freelance Project - Developed a charity donation platform using Next.js and Next Router. Built a user-friendly interface to facilitate donation collection.',
+      tech: ['Next.js', 'Next Router', 'CSS'],
+      features: ['Donation System', 'Multi-page Routing', 'Accessibility', 'Responsive Design'],
+     
+      demo: 'https://fajr-alkhayr.vercel.app/',
+      image: '/projects/Screenshot 2025-09-07 111024.png'
     }
   ];
-
+  const [state, handleSubmit] = useForm("xandaqbk");
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark bg-black text-white' : 'bg-white text-black'}`}>
       {/* Navigation */}
@@ -648,47 +693,40 @@ export default function Home() {
           <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 lg:mb-16 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>
             Technical Skills
           </h2>
-          <div className="relative min-h-[600px] max-w-4xl mx-auto">
-            {skills.map((skill, index) => {
-              // Random positioning for each skill
-              const positions = [
-                { top: '10%', left: '15%' },
-                { top: '5%', left: '45%' },
-                { top: '15%', left: '75%' },
-                { top: '35%', left: '5%' },
-                { top: '30%', left: '35%' },
-                { top: '25%', left: '65%' },
-                { top: '40%', left: '85%' },
-                { top: '55%', left: '20%' },
-                { top: '50%', left: '50%' },
-                { top: '60%', left: '80%' },
-                { top: '75%', left: '10%' },
-                { top: '70%', left: '40%' },
-                { top: '80%', left: '70%' },
-                { top: '90%', left: '30%' },
-                { top: '85%', left: '60%' }
-              ];
-              
-              const position = positions[index] || { top: '50%', left: '50%' };
-              
-              return (
-                <div
-                  key={skill.name}
-                  className={`skill-card group absolute p-3 sm:p-4 rounded-full transition-all duration-500 transform hover:scale-110 hover:shadow-xl border-2 shadow-md hover:rotate-3 cursor-pointer ${isDarkMode ? 'bg-black bg-opacity-80 backdrop-blur-sm border-white border-opacity-30 text-white hover:bg-opacity-90 hover:border-opacity-50' : 'bg-white bg-opacity-90 backdrop-blur-sm border-black border-opacity-30 text-black hover:bg-opacity-100 hover:border-opacity-50'}`}
-                  style={{ 
-                    top: position.top, 
-                    left: position.left,
-                    transform: 'translate(-50%, -50%)'
-                  }}
-                >
-                  <div className="text-center whitespace-nowrap">
-                    <span className={`font-medium text-xs sm:text-sm transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>
-                      {skill.name}
-                    </span>
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-6 sm:gap-8 max-w-6xl mx-auto">
+            {skills.map((skill, index) => (
+              <div
+                key={skill.name}
+                className={`skill-card group relative p-6 rounded-xl transition-all duration-500 transform hover:scale-105 hover:shadow-xl hover:-translate-y-2 cursor-pointer border ${isDarkMode ? 'bg-white bg-opacity-5 backdrop-blur-sm border-white border-opacity-20 hover:bg-opacity-10 hover:border-opacity-40' : 'bg-white border-gray-200 hover:border-gray-300 shadow-md hover:shadow-lg'}`}
+              >
+                {/* Skill Icon */}
+                <div className="flex justify-center mb-4">
+                  <div className={`w-16 h-16 rounded-lg flex items-center justify-center text-sm font-bold transition-all duration-300 group-hover:scale-110 bg-gradient-to-br ${skill.color} text-white shadow-lg`}>
+                    {skill.icon}
                   </div>
                 </div>
-              );
-            })}
+                
+                {/* Skill Name */}
+                <h3 className={`text-center font-semibold text-base mb-2 transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>
+                  {skill.name}
+                </h3>
+                
+                {/* Category Badge */}
+                <div className="flex justify-center">
+                  <span className={`px-3 py-1 text-xs font-medium rounded-full transition-all duration-300 ${isDarkMode ?'bg-gray-100 text-gray-600' : 'bg-gray-100 text-gray-600'}`}>
+                    {skill.category}
+                  </span>
+                </div>
+                
+                {/* Progress Bar */}
+                <div className={`mt-4 h-1 rounded-full overflow-hidden ${isDarkMode ? 'bg-white bg-opacity-20' : 'bg-gray-200'}`}>
+                  <div 
+                    className={`h-full bg-gradient-to-r ${skill.color} transition-all duration-1000 group-hover:w-full transform origin-left scale-x-0`}
+                    style={{ '--target-width': `${70 + (index % 4) * 10}%` } as React.CSSProperties}
+                  ></div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>
@@ -703,47 +741,62 @@ export default function Home() {
             {projects.map((project, index) => (
               <div
                 key={project.title}
-                className={`project-card group rounded-2xl p-4 sm:p-6 border-2 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg ${isDarkMode ? 'bg-white hover:bg-white border-black hover:border-black' : 'bg-white hover:bg-white border-black hover:border-black'}`}
+                className={`project-card group rounded-2xl p-4 sm:p-6 transition-all duration-300 transform hover:scale-105 hover:shadow-2xl shadow-lg flex flex-col ${isDarkMode ? 'bg-black bg-opacity-80 backdrop-blur-sm hover:bg-opacity-90' : 'bg-white border-2 border-gray-200 hover:border-gray-300'}`}
               >
-                <h3 className={`text-lg sm:text-xl font-semibold mb-3 transition-colors duration-300 ${isDarkMode ? 'text-black group-hover:text-black' : 'text-black group-hover:text-black'}`}>{project.title}</h3>
-                <p className={`mb-4 text-xs sm:text-sm leading-relaxed transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-black'}`}>{project.description}</p>
+                {/* Project Image */}
+                <div className="w-full h-48 rounded-lg mb-4 overflow-hidden">
+                  {project.image ? (
+                    <img
+                      src={project.image}
+                      alt={project.title}
+                      className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
+                    />
+                  ) : (
+                    <div className={`w-full h-full flex items-center justify-center transition-colors duration-300 ${isDarkMode ? 'bg-white bg-opacity-10' : 'bg-gray-100'}`}>
+                      <div className={`text-4xl transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-400'}`}>
+                        🖥️
+                      </div>
+                    </div>
+                  )}
+                </div>
                 
-                <div className="mb-4">
-                  <h4 className={`text-xs sm:text-sm font-semibold mb-2 transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>Technologies:</h4>
-                  <div className="flex flex-wrap gap-1 sm:gap-2">
-                    {project.tech.map((tech) => (
-                      <span
-                        key={tech}
-                        className={`px-2 py-1 text-xs rounded-full border transition-colors duration-300 ${isDarkMode ? 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30 border-black hover:bg-white hover:text-black' : 'bg-white text-black border-black hover:bg-white hover:text-black'}`}
-                      >
-                        {tech}
-                      </span>
-                    ))}
+                {/* Content that can grow */}
+                <div className="flex-grow">
+                  <h3 className={`text-lg sm:text-xl font-semibold mb-3 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>{project.title}</h3>
+                  <p className={`mb-4 text-xs sm:text-sm leading-relaxed transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>{project.description}</p>
+                  
+                  <div className="mb-4">
+                    <h4 className={`text-xs sm:text-sm font-semibold mb-2 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Technologies:</h4>
+                    <div className="flex flex-wrap gap-1 sm:gap-2">
+                      {project.tech.map((tech) => (
+                        <span
+                          key={tech}
+                          className={`px-2 py-1 text-xs rounded-full transition-colors duration-300 ${isDarkMode ? 'bg-black bg-opacity-60 text-white border border-white border-opacity-30' : 'bg-gray-100 text-gray-700 border border-gray-200'}`}
+                        >
+                          {tech}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="mb-4 sm:mb-6">
+                    <h4 className={`text-xs sm:text-sm font-semibold mb-2 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>Key Features:</h4>
+                    <ul className={`text-xs space-y-1 transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
+                      {project.features.map((feature) => (
+                        <li key={feature} className="flex items-start">
+                          <span className={`mr-2 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-gray-800'}`}>•</span>
+                          <span>{feature}</span>
+            </li>
+                      ))}
+                    </ul>
                   </div>
                 </div>
 
-                <div className="mb-4 sm:mb-6">
-                  <h4 className={`text-xs sm:text-sm font-semibold mb-2 transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>Key Features:</h4>
-                  <ul className={`text-xs space-y-1 transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-black'}`}>
-                    {project.features.map((feature) => (
-                      <li key={feature} className="flex items-start">
-                        <span className={`mr-2 transition-colors duration-300 ${isDarkMode ? 'text-black' : 'text-gray-800'}`}>•</span>
-                        <span>{feature}</span>
-          </li>
-                    ))}
-                  </ul>
-                </div>
-
-                <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
+                {/* Button always at bottom */}
+                <div className="flex justify-center mt-auto">
                   <a
-                    href={project.github}
-                    className={`flex-1 px-3 sm:px-4 py-2 rounded-lg text-center text-xs sm:text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 border shadow-md hover:shadow-lg ${isDarkMode ? 'bg-white hover:bg-white hover:text-black text-black border-black' : 'bg-white hover:bg-white hover:text-black text-black border-black'}`}
-                  >
-                    GitHub
-          </a>
-          <a
                     href={project.demo}
-                    className={`flex-1 px-3 sm:px-4 py-2 rounded-lg text-center text-xs sm:text-sm font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl ${isDarkMode ? 'bg-white hover:bg-gray-300 text-black' : 'bg-white hover:bg-gray-800 text-black'}`}
+                    className={`w-full px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-center text-sm sm:text-base font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}
                   >
                     Live Demo
                   </a>
@@ -760,49 +813,148 @@ export default function Home() {
           <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold mb-6 sm:mb-8 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'bg-gradient-to-r from-gray-800 to-black bg-clip-text text-transparent'}`}>
             Let's Work Together
           </h2>
-          <p className={`text-base sm:text-lg lg:text-xl mb-8 sm:mb-12 max-w-2xl mx-auto transition-colors duration-300 ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>
-            Ready to bring your ideas to life? Let's discuss your next project!
+          {/* Contact Form */}
+          <div className="max-w-2xl mx-auto mb-8 sm:mb-12">
+       <form 
+         onSubmit={handleSubmit}
+         className={`p-6 sm:p-8 rounded-2xl transition-all duration-300 ${
+           isDarkMode 
+             ? 'bg-black' 
+             : 'bg-white border border-gray-200 shadow-lg'
+         }`}
+       >
+        {/* Success Message */}
+        {state.succeeded && (
+          <p className="text-green-500 font-semibold text-center mb-4">
+            ✅ Your message has been sent successfully!
           </p>
-          
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-4 sm:gap-6 lg:gap-8 mb-8 sm:mb-12">
-            <div className="interactive-card p-4 sm:p-6 rounded-2xl border-2 ${isDarkMode ? 'bg-white bg-opacity-20 backdrop-blur-md border-white border-opacity-30' : 'bg-white border-gray-200 hover:border-gray-800'} shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group">
-              <div className="text-2xl sm:text-3xl mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">📧</div>
-              <h3 className={`font-semibold mb-2 text-sm sm:text-base ${isDarkMode ? 'text-white' : 'text-black'}`}>Email</h3>
-              <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>your.email@example.com</p>
-            </div>
-            <div className="interactive-card p-4 sm:p-6 rounded-2xl border-2 ${isDarkMode ? 'bg-white bg-opacity-20 backdrop-blur-md border-white border-opacity-30' : 'bg-white border-gray-200 hover:border-gray-800'} shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105 group">
-              <div className="text-2xl sm:text-3xl mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">💼</div>
-              <h3 className={`font-semibold mb-2 text-sm sm:text-base ${isDarkMode ? 'text-white' : 'text-black'}`}>LinkedIn</h3>
-              <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>linkedin.com/in/yourprofile</p>
-            </div>
-            <div className="p-4 sm:p-6 rounded-2xl border-2 ${isDarkMode ? 'bg-white bg-opacity-20 backdrop-blur-md border-white border-opacity-30' : 'bg-white border-gray-200 hover:border-gray-800'} shadow-lg hover:shadow-xl transition-all duration-300 group sm:col-span-2 md:col-span-1">
-              <div className="text-2xl sm:text-3xl mb-3 sm:mb-4 group-hover:scale-110 transition-transform duration-300">📱</div>
-              <h3 className={`font-semibold mb-2 text-sm sm:text-base ${isDarkMode ? 'text-white' : 'text-black'}`}>GitHub</h3>
-              <p className={`text-xs sm:text-sm ${isDarkMode ? 'text-gray-300' : 'text-gray-600'}`}>github.com/yourusername</p>
-            </div>
+        )}
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6 mb-4 sm:mb-6">
+          {/* Name Input */}
+          <div>
+            <input
+              type="text"
+              name="name"
+              placeholder="Your Name"
+              required
+               className={`w-full px-4 py-3 rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 ${
+                 isDarkMode 
+                   ? 'bg-white border-gray-300 text-black placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500' 
+                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500'
+               }`}
+            />
           </div>
 
-          <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center max-w-md mx-auto">
-            <a
-              href="mailto:your.email@example.com"
-              className={`px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 shadow-lg hover:shadow-xl animate-pulse hover:animate-none ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-white hover:bg-gray-800 text-black hover:text-white'}`}
-            >
-              Get In Touch
-        </a>
-        <a
-              href="#"
-              className={`border-2 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-2 shadow-md hover:shadow-lg ${isDarkMode ? 'border-white text-white hover:border-gray-300 hover:text-gray-300' : 'border-gray-800 hover:border-black text-gray-800 hover:text-black hover:bg-gray-50'}`}
-            >
-              Download CV
-            </a>
+          {/* Email Input */}
+          <div>
+            <input
+              type="email"
+              name="email"
+              placeholder="Your Email"
+              required
+               className={`w-full px-4 py-3 rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 ${
+                 isDarkMode 
+                   ? 'bg-white border-gray-300 text-black placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500' 
+                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500'
+               }`}
+            />
+            <ValidationError prefix="Email" field="email" errors={state.errors} />
           </div>
+        </div>
+
+        {/* Subject Input */}
+        <div className="mb-4 sm:mb-6">
+          <input
+            type="text"
+            name="subject"
+            placeholder="Project Subject"
+               className={`w-full px-4 py-3 rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 ${
+                 isDarkMode 
+                   ? 'bg-white border-gray-300 text-black placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500' 
+                   : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500'
+               }`}
+          />
+        </div>
+
+        {/* Message Textarea */}
+        <div className="mb-6 sm:mb-8">
+          <textarea
+            rows={5}
+            name="message"
+            placeholder="Tell me about your project..."
+            required
+             className={`w-full px-4 py-3 rounded-lg border transition-all duration-300 focus:outline-none focus:ring-2 resize-none ${
+               isDarkMode 
+                 ? 'bg-white border-gray-300 text-black placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500' 
+                 : 'bg-white border-gray-300 text-gray-900 placeholder-gray-500 focus:ring-blue-500 focus:border-blue-500'
+             }`}
+          ></textarea>
+          <ValidationError prefix="Message" field="message" errors={state.errors} />
+        </div>
+
+        {/* Submit Button */}
+        <div className="text-center">
+           <button
+             type="submit"
+             disabled={state.submitting}
+             className={`px-8 py-3 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none ${
+               isDarkMode 
+                 ? 'bg-black text-white hover:bg-black-800 shadow-black/25' 
+                 : 'bg-black text-white hover:bg-gray-800'
+             }`}
+           >
+            {state.submitting ? "Sending..." : "Send Message →"}
+          </button>
+        </div>
+      </form>
+    </div>
+
+         
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="py-6 sm:py-8 px-4 sm:px-6 lg:px-8 bg-white ">
+      <footer className={`py-6 sm:py-8 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto text-center">
-          <p className="text-gray-300 text-sm sm:text-base">
+          {/* Social Links */}
+          <div className="flex justify-center space-x-6 mb-4">
+            <a 
+              href="https://github.com/MohamedTealeb" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={`transition-colors duration-300 hover:scale-110 transform ${isDarkMode ? 'text-gray-400 hover:text-white' : 'text-gray-600 hover:text-black'}`}
+              aria-label="GitHub"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/>
+              </svg>
+            </a>
+            
+            <a 
+              href="https://wa.me/+201555157722" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className={`transition-colors duration-300 hover:scale-110 transform ${isDarkMode ? 'text-gray-400 hover:text-green-400' : 'text-gray-600 hover:text-green-600'}`}
+              aria-label="WhatsApp"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893A11.821 11.821 0 0020.885 3.488z"/>
+              </svg>
+            </a>
+            
+            <a 
+              href="mailto:mohamedtealeb088@gmail.com" 
+              className={`transition-colors duration-300 hover:scale-110 transform ${isDarkMode ? 'text-gray-400 hover:text-red-400' : 'text-gray-600 hover:text-red-600'}`}
+              aria-label="Gmail"
+            >
+              <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                <path d="M24 5.457v13.909c0 .904-.732 1.636-1.636 1.636h-3.819V11.73L12 16.64l-6.545-4.91v9.273H1.636A1.636 1.636 0 0 1 0 19.366V5.457c0-2.023 2.309-3.178 3.927-1.964L5.455 4.64 12 9.548l6.545-4.91 1.528-1.145C21.69 2.28 24 3.434 24 5.457z"/>
+              </svg>
+            </a>
+          </div>
+          
+          <p className={`text-sm sm:text-base transition-colors duration-300 ${isDarkMode ? 'text-gray-400' : 'text-gray-600'}`}>
             © 2024 MERN Stack Developer. Built with Next.js and Tailwind CSS.
           </p>
         </div>
