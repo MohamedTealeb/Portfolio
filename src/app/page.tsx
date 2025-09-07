@@ -7,6 +7,7 @@ import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { ThemeToggleButton } from '@/components/theme-toggle';
 import { useForm, ValidationError } from '@formspree/react';
 import Image from 'next/image';
+import Link from "next/link";
 
 // Register GSAP plugins
 if (typeof window !== 'undefined') {
@@ -421,9 +422,12 @@ export default function Home() {
     const element = document.getElementById(sectionId);
     if (element) {
       gsap.to(window, {
-        duration: 1,
-        scrollTo: { y: element, offsetY: 80 },
-        ease: 'power2.inOut'
+        duration: 1.5,
+        scrollTo: {
+          y: element,
+          offsetY: 80 // Account for fixed navbar height
+        },
+        ease: "power2.inOut"
       });
     }
   };
@@ -596,19 +600,30 @@ export default function Home() {
               Building modern, scalable web applications with cutting-edge technologies.
             </p>
             <div className="hero-buttons flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center items-center max-w-md sm:max-w-none mx-auto">
-              <button 
-                onClick={() => scrollToSection('projects')}
-                className={`w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl animate-pulse hover:animate-none ${isDarkMode ? 'bg-white text-black hover:bg-gray-200 hover:text-black' : 'bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30 hover:bg-white hover:text-black'}`}
-              >
-                View My Work
-              </button>
-              <button 
-                onClick={() => scrollToSection('contact')}
-                className={`w-full sm:w-auto border-2 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-md hover:shadow-lg ${isDarkMode ? 'border-white text-white hover:border-gray-300 hover:text-gray-300' : 'border-black text-black hover:border-black hover:text-black'}`}
-              >
-                Contact Me
-              </button>
-            </div>
+      
+      <Link href="#projects">
+        <button
+          className={`cursor-pointer w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all duration-200 ease-out transform hover:scale-105 hover:-translate-y-1 active:scale-95 active:translate-y-0 shadow-lg hover:shadow-xl animate-pulse hover:animate-none focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+            isDarkMode
+              ? "bg-white text-black hover:bg-gray-200 hover:text-black focus:ring-white"
+              : "bg-white bg-opacity-20 backdrop-blur-md text-black border border-white border-opacity-30 hover:bg-white hover:text-black focus:ring-black"
+          }`}
+        >
+          View My Work
+        </button>
+      </Link>
+      <Link href="#contact">
+      <button
+        className={`cursor-pointer w-full sm:w-auto border-2 px-6 sm:px-8 py-3 sm:py-4 rounded-full font-semibold transition-all duration-200 ease-out transform hover:scale-105 hover:-translate-y-1 active:scale-95 active:translate-y-0 shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+          isDarkMode
+            ? "border-white text-white hover:border-gray-300 hover:text-gray-300 focus:ring-white"
+            : "border-black text-black hover:border-black hover:text-black focus:ring-black"
+        }`}
+      >
+        Contact Me
+      </button>
+      </Link>
+    </div>
           </div>
         </div>
       </section>
