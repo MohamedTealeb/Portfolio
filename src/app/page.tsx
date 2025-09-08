@@ -626,7 +626,7 @@ export default function Home() {
                 <span className={`typewriter-cursor transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>|</span>
               </span>
               <br />
-              <span className={`transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>Developer</span>
+              <span className={`transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}></span>
             </h1>
             <p className={`hero-subtitle text-base sm:text-lg md:text-xl lg:text-2xl mb-6 sm:mb-8 max-w-4xl mx-auto leading-relaxed px-4 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>
               Full Stack Developer specializing in MongoDB, Express.js, React, and Node.js.
