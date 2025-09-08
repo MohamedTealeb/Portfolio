@@ -1,19 +1,12 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { gsap } from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { ScrollToPlugin } from 'gsap/ScrollToPlugin';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggleButton } from '@/components/theme-toggle';
 import { useForm, ValidationError } from '@formspree/react';
 import Image from 'next/image';
 import Link from "next/link";
 
-// Register GSAP plugins
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger, ScrollToPlugin);
-}
 
 export default function Home() {
   const [isVisible, setIsVisible] = useState(false);
@@ -180,151 +173,44 @@ export default function Home() {
     setStarsData(generateStarsData());
     setIsVisible(true);
 
-    // Typewriter effect for MERN and Stack separately
+    // Simple typewriter effect without GSAP
     const mernText = "MERN";
-    const stackText = "Stack";
-    
-    console.log('Typewriter texts:', { mernText, stackText });
+    const stackText = "Stack Developer";
     
     if (typewriterMernRef.current && typewriterStackRef.current) {
       typewriterMernRef.current.textContent = "";
       typewriterStackRef.current.textContent = "";
       
-      // Create typewriter animation
-      const tl = gsap.timeline();
-      
-      // First show the hero title container
-      tl.from('.hero-title', {
-        duration: 0.8,
-        y: 50,
-        opacity: 0,
-        ease: 'power3.out',
-      });
-
-      // Animate MERN first
-      mernText.split('').forEach((char, index) => {
-        const typingDelay = 0.08; // Fixed delay for consistency
-        tl.to(typewriterMernRef.current, {
-          duration: 0.02,
-          ease: 'none',
-          onComplete: () => {
-            if (typewriterMernRef.current) {
-              typewriterMernRef.current.textContent += char;
-            }
-          }
-        }, index * typingDelay + 0.8);
-      });
-
-      // Animate Stack after MERN with a small pause
-      stackText.split('').forEach((char, index) => {
-        const typingDelay = 0.08; // Fixed delay for consistency
-        tl.to(typewriterStackRef.current, {
-          duration: 0.02,
-          ease: 'none',
-          onComplete: () => {
-            if (typewriterStackRef.current) {
-              typewriterStackRef.current.textContent += char;
-            }
-          }
-        }, index * typingDelay + 1.2); // Start Stack after MERN
-      });
-
-      // Add cursor blinking effect - start after MERN is complete
-      const blinkingTween = gsap.to('.typewriter-cursor', {
-        duration: 0.5,
-        opacity: 0,
-        ease: 'power2.inOut',
-        repeat: -1,
-        yoyo: true,
-      });
-      
-      // Start blinking after MERN is complete
-      tl.add(() => {
-        blinkingTween.play();
-      }, 1.1);
-
-      // Stop blinking and hide cursor after typing is complete
-      // Stack has 5 characters, so it finishes at 1.2 + (5 * 0.08) = 1.64s
-      tl.add(() => {
-        blinkingTween.kill();
-        gsap.set('.typewriter-cursor', {
-          opacity: 0,
-          display: 'none'
-        });
-      }, 1.7); // Hide cursor 0.1s after Stack is complete
-
-      // Animate other elements
-      tl.from('.hero-subtitle', {
-        duration: 1,
-        y: 50,
-        opacity: 0,
-        ease: 'power3.out',
-      }, '-=0.5')
-      .from('.hero-buttons', {
-        duration: 0.8,
-        y: 30,
-        opacity: 0,
-        ease: 'power2.out',
-      }, '-=0.3');
+      // Simple typewriter animation with setTimeout
+      let mernIndex = 0;
+      const typewriterMern = setInterval(() => {
+        if (typewriterMernRef.current && mernIndex < mernText.length) {
+          typewriterMernRef.current.textContent += mernText[mernIndex];
+          mernIndex++;
+        } else {
+          clearInterval(typewriterMern);
+          
+          // Start typewriter effect for "Stack Developer"
+          setTimeout(() => {
+            let stackIndex = 0;
+            const typewriterStack = setInterval(() => {
+              if (typewriterStackRef.current && stackIndex < stackText.length) {
+                typewriterStackRef.current.textContent += stackText[stackIndex];
+                stackIndex++;
+              } else {
+                clearInterval(typewriterStack);
+              }
+            }, 100);
+          }, 500);
+        }
+      }, 150);
     }
 
-    // About section scroll animation
-    gsap.fromTo(aboutRef.current, 
-      { opacity: 0, y: 100 },
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1,
-        ease: 'power3.out',
-        scrollTrigger: {
-          trigger: aboutRef.current,
-          start: 'top 80%',
-          end: 'bottom 20%',
-          toggleActions: 'play none none reverse',
-        }
-      }
-    );
+    // Removed GSAP scroll animation
 
-    // Planetary Skills System Animation
-    gsap.fromTo('.central-skills-sun',
-      { 
-        opacity: 0, 
-        scale: 0.5
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        duration: 1.2,
-        ease: 'elastic.out(1, 0.75)',
-        scrollTrigger: {
-          trigger: skillsRef.current,
-          start: 'top 80%',
-          toggleActions: 'play none none reverse',
-        }
-      }
-    );
+    // Removed GSAP skills animation
 
-    // Animate skill planets appearing
-    gsap.fromTo('.skill-planet',
-      { 
-        opacity: 0, 
-        scale: 0,
-        rotationY: -180
-      },
-      {
-        opacity: 1,
-        scale: 1,
-        rotationY: 0,
-        duration: 0.8,
-        ease: 'back.out(1.7)',
-        stagger: 0.1,
-        scrollTrigger: {
-          trigger: skillsRef.current,
-          start: 'top 70%',
-          toggleActions: 'play none none reverse',
-        }
-      }
-    );
+    // Removed GSAP planet animation
 
     // Removed GSAP animations for cards - now using framer-motion
 
@@ -337,8 +223,6 @@ export default function Home() {
 
     // Enhanced 3D space objects with orbital systems
     if (backgroundRef.current) {
-      const spaceObjects = backgroundRef.current.querySelectorAll('.bg-shape');
-      const orbitContainers = backgroundRef.current.querySelectorAll('.orbit-container');
       
       // Minimal about section animations - CSS-based twinkling
       const aboutBgObjects = document.querySelectorAll('[key^="about-"]');
@@ -354,37 +238,12 @@ export default function Home() {
       const centralSun = backgroundRef.current.querySelector('.central-sun');
       if (centralSun) {
         // Simple rotation only - removed floating and pulsing for better performance
-        gsap.to(centralSun, {
-          rotationY: 360,
-          duration: 30,
-          ease: 'none',
-          repeat: -1,
-        });
+        // CSS rotation animation instead
       }
 
-      // Simplified central planets animation
-      const centralPlanets = backgroundRef.current.querySelectorAll('.central-planet:not(.central-sun)');
-      centralPlanets.forEach((planet, index) => {
-        // Simple self rotation only
-        gsap.to(planet, {
-          rotationY: 360,
-          duration: 15,
-          ease: 'none',
-          repeat: -1,
-        });
-      });
+      // Simplified central planets animation - using CSS instead
       
-      // Simplified orbiting planets animation
-      const orbitingPlanets = backgroundRef.current.querySelectorAll('.orbiting-planet');
-      orbitingPlanets.forEach((planet, index) => {
-        // Simple self rotation only
-        gsap.to(planet, {
-          rotationY: 360,
-          duration: 12,
-          ease: 'none',
-          repeat: -1,
-        });
-      });
+      // Simplified orbiting planets animation - using CSS instead
       
       // Removed orbit container animations for better performance
       
@@ -424,13 +283,8 @@ export default function Home() {
           const moveX = normalizedX * 8;
           const moveY = normalizedY * 6;
           
-          gsap.to(htmlObject, {
-            x: moveX,
-            y: moveY,
-            duration: 1.5,
-            ease: 'power1.out',
-            overwrite: 'auto'
-          });
+          // Simple CSS transform
+          htmlObject.style.transform = `translate(${moveX}px, ${moveY}px)`;
         });
         
         mouseThrottled = false;
@@ -446,12 +300,8 @@ export default function Home() {
         if (backgroundRef.current) {
           const centralPlanets = backgroundRef.current.querySelectorAll('.central-planet, .central-sun');
           centralPlanets.forEach((planet: Element) => {
-            gsap.to(planet, {
-              x: 0,
-              y: 0,
-              duration: 1.8,
-              ease: 'power1.out'
-            });
+            // Reset position
+            (planet as HTMLElement).style.transform = 'translate(0, 0)';
           });
         }
       });
@@ -459,13 +309,10 @@ export default function Home() {
 
     // Cleanup function
     return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-      
       // Remove mouse event listeners
-      const currentHeroRef = heroSectionRef.current;
-      if (currentHeroRef) {
-        currentHeroRef.removeEventListener('mousemove', handleMouseMove);
-        currentHeroRef.removeEventListener('mouseleave', () => {});
+      if (heroSectionRef.current) {
+        heroSectionRef.current.removeEventListener('mousemove', handleMouseMove);
+        heroSectionRef.current.removeEventListener('mouseleave', () => {});
       }
     };
   }, []);
@@ -486,20 +333,13 @@ export default function Home() {
         }))
       );
     }
-  }, [isDarkMode]);
+  }, [isDarkMode, starsData.length]);
 
   // Memoized scroll functions for better performance
   const scrollToSection = useCallback((sectionId: string) => {
     const element = document.getElementById(sectionId);
     if (element) {
-      gsap.to(window, {
-        duration: 1.2,
-        scrollTo: {
-          y: element,
-          offsetY: 80 // Account for fixed navbar height
-        },
-        ease: "power1.inOut"
-      });
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }, []);
 
@@ -576,16 +416,16 @@ export default function Home() {
   return (
     <div className={`min-h-screen transition-colors duration-300 ${isDarkMode ? 'dark bg-black text-white' : 'bg-white text-black'}`}>
       {/* Navigation */}
-      <nav className={`navbar fixed top-0 w-full backdrop-blur-sm shadow-lg z-50 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
+      <nav className={`navbar fixed top-0 w-full backdrop-blur-sm shadow-lg z-50 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
         <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center items-center h-16 relative">
             {/* Desktop Menu - Centered */}
             <div className="hidden md:flex items-center justify-center space-x-6 lg:space-x-8">
-              <button onClick={() => scrollToSection('home')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Home</button>
-              <button onClick={() => scrollToSection('about')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>About</button>
-              <button onClick={() => scrollToSection('skills')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Skills</button>
-              <button onClick={() => scrollToSection('projects')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Projects</button>
-              <button onClick={() => scrollToSection('contact')} className={`transition-colors cursor-pointer font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Contact</button>
+              <button onClick={() => scrollToSection('home')} className={`cursor-pointer font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>Home</button>
+              <button onClick={() => scrollToSection('about')} className={`cursor-pointer font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>About</button>
+              <button onClick={() => scrollToSection('skills')} className={`cursor-pointer font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>Skills</button>
+              <button onClick={() => scrollToSection('projects')} className={`cursor-pointer font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>Projects</button>
+              <button onClick={() => scrollToSection('contact')} className={`cursor-pointer font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>Contact</button>
             </div>
             
             {/* Dark Mode Toggle - Positioned absolutely to the right */}
@@ -600,7 +440,7 @@ export default function Home() {
             <div className="md:hidden absolute left-0">
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className={`p-2 rounded-md transition-colors ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}
+                className={`p-2 rounded-md ${isDarkMode ? 'text-white' : 'text-black'}`}
               >
                 <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={isMobileMenuOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
@@ -611,13 +451,13 @@ export default function Home() {
 
           {/* Mobile Menu */}
           {isMobileMenuOpen && (
-            <div className={`md:hidden absolute top-16 left-0 right-0 backdrop-blur-sm shadow-lg transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
+            <div className={`md:hidden absolute top-16 left-0 right-0 backdrop-blur-sm shadow-lg ${isDarkMode ? 'bg-black' : 'bg-white'}`}>
               <div className="px-4 py-3 space-y-3 text-center">
-                <button onClick={() => {scrollToSection('home'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Home</button>
-                <button onClick={() => {scrollToSection('about'); setIsMobileMenuOpen(false);}} className={`block w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>About</button>
-                <button onClick={() => {scrollToSection('skills'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Skills</button>
-                <button onClick={() => {scrollToSection('projects'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Projects</button>
-                <button onClick={() => {scrollToSection('contact'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md transition-colors font-medium ${isDarkMode ? 'text-white hover:text-white' : 'text-black hover:text-black'}`}>Contact</button>
+                <button onClick={() => {scrollToSection('home'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>Home</button>
+                <button onClick={() => {scrollToSection('about'); setIsMobileMenuOpen(false);}} className={`block w-full text-center px-3 py-2 rounded-md font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>About</button>
+                <button onClick={() => {scrollToSection('skills'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>Skills</button>
+                <button onClick={() => {scrollToSection('projects'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>Projects</button>
+                <button onClick={() => {scrollToSection('contact'); setIsMobileMenuOpen(false);}} className={`block cursor-pointer w-full text-center px-3 py-2 rounded-md font-medium ${isDarkMode ? 'text-white' : 'text-black'}`}>Contact</button>
               </div>
             </div>
           )}
@@ -1035,7 +875,7 @@ export default function Home() {
       </section>
 
       {/* Skills Section */}
-      <section id="skills" className={`py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 ${isDarkMode ? 'bg-black' : 'bg-white'}`} ref={skillsRef}>
+      <section id="skills" className={`py-12 sm:py-16 lg:py-20 px-4 sm:px-6 lg:px-8 transition-colors duration-300 select-none sm:select-text ${isDarkMode ? 'bg-black' : 'bg-white'}`} ref={skillsRef}>
         <div className="max-w-6xl mx-auto">
           <h2 className={`text-3xl sm:text-4xl lg:text-5xl font-bold text-center mb-8 sm:mb-12 lg:mb-16 transition-colors duration-300 ${isDarkMode ? 'text-white' : 'text-black'}`}>
             Technical Skills
@@ -1046,7 +886,7 @@ export default function Home() {
 
             {/* Central Sun - Mobile */}
             <div
-              className={`sm:hidden central-skills-sun absolute transition-all duration-500 hover:scale-110 cursor-pointer rounded-full flex items-center justify-center border-2 ${isDarkMode ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 border-yellow-300 shadow-[0_0_15px_rgba(255,215,0,0.6),0_0_25px_rgba(255,165,0,0.4)]' : 'bg-gradient-to-br from-yellow-300 via-orange-400 to-red-500 border-yellow-400 shadow-[0_0_12px_rgba(255,165,0,0.5),0_0_20px_rgba(255,140,0,0.3)]'}`}
+              className={`sm:hidden central-skills-sun absolute rounded-full flex items-center justify-center border-2 ${isDarkMode ? 'bg-gradient-to-br from-yellow-400 via-orange-500 to-red-600 border-yellow-300 shadow-[0_0_15px_rgba(255,215,0,0.6),0_0_25px_rgba(255,165,0,0.4)]' : 'bg-gradient-to-br from-yellow-300 via-orange-400 to-red-500 border-yellow-400 shadow-[0_0_12px_rgba(255,165,0,0.5),0_0_20px_rgba(255,140,0,0.3)]'}`}
               style={{
                 left: 'calc(50% - 2px)',
                 top: '50%',
@@ -1104,7 +944,7 @@ export default function Home() {
                 <div key={skill.name}>
                   {/* Connection Line - Mobile */}
                   <div
-                    className={`sm:hidden absolute transition-all duration-500 ${isDarkMode ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600' : 'bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500'}`}
+                    className={`sm:hidden absolute ${isDarkMode ? 'bg-gradient-to-r from-yellow-400 via-orange-500 to-red-600' : 'bg-gradient-to-r from-yellow-300 via-orange-400 to-red-500'}`}
                     style={{
                       left: `calc(50% - 2px)`,
                       top: `calc(50%)`,
@@ -1179,34 +1019,9 @@ export default function Home() {
           </h2>
           <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {projects.map((project, index) => (
-              <motion.div
+              <div
                 key={project.title}
                 className={`project-card group rounded-2xl p-4 sm:p-6 shadow-lg flex flex-col ${isDarkMode ? 'bg-black bg-opacity-80 backdrop-blur-sm hover:bg-opacity-90' : 'bg-white border-2 border-gray-200 hover:border-gray-300'}`}
-                initial={{ 
-                  opacity: 0, 
-                  y: 100, 
-                  rotateX: 45,
-                  scale: 0.8 
-                }}
-                whileInView={{ 
-                  opacity: 1, 
-                  y: 0, 
-                  rotateX: 0,
-                  scale: 1,
-                  transition: {
-                    duration: 0.8,
-                    delay: index * 0.2,
-                    ease: [0.25, 0.46, 0.45, 0.94]
-                  }
-                }}
-                whileHover={{ 
-                  scale: 1.05,
-                  y: -10,
-                  rotateY: 5,
-                  transition: { duration: 0.3, ease: "easeOut" }
-                }}
-                whileTap={{ scale: 0.95 }}
-                viewport={{ once: true, margin: "-50px" }}
               >
                 {/* Project Image */}
                 <div className="w-full h-48 rounded-lg mb-4 overflow-hidden">
@@ -1263,12 +1078,14 @@ export default function Home() {
                 <div className="flex justify-center mt-auto">
                   <a
                     href={project.demo}
-                    className={`w-full px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-center text-sm sm:text-base font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:bg-gray-800'}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={`block w-full px-4 sm:px-6 py-2 sm:py-3 rounded-lg text-center text-sm sm:text-base font-semibold transition-all duration-300 transform hover:scale-105 hover:-translate-y-1 shadow-lg hover:shadow-xl ${isDarkMode ? 'bg-white text-black hover:bg-gray-200' : 'bg-black text-white hover:shadow-black/25'}`}
                   >
                     Live Demo
                   </a>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         </div>
@@ -1435,8 +1252,8 @@ export default function Home() {
              disabled={state.submitting}
              className={`px-8 py-3 rounded-full font-semibold shadow-lg disabled:opacity-50 disabled:cursor-not-allowed ${
                isDarkMode 
-                 ? 'bg-black text-white hover:bg-black-800 shadow-black/25' 
-                 : 'bg-black text-white hover:bg-gray-800'
+                 ? 'bg-white text-black hover:bg-white-800 cursor-pointer shadow-black/25' 
+                 : 'bg-black text-white hover:shadow-black/25 cursor-pointer'
              }`}
              whileHover={{ 
                scale: 1.05,
